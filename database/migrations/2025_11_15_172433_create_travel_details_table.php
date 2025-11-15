@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
+use App\Models\Travel;
 return new class extends Migration
 {
     /**
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('mark');
             $table->string('type');
             $table->year('year_make');
+            $table->foreignIdFor(Travel::class);
             $table->timestamps();
         });
      
