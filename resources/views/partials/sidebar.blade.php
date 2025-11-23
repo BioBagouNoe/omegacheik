@@ -7,7 +7,7 @@
       <nav class="sidebar-nav">
           <!-- Section Profil -->
           <div class="profile-section">
-              <a href="#profil" class="nav-item">
+              <a href="{{ route('profile') }}" class="nav-item">
                   <i class="fas fa-user-circle"></i>
                   Mon Profil
               </a>
@@ -15,23 +15,23 @@
 
           <div class="nav-section" id="gestion-parc">
               <div class="nav-section-title">Gestion du Parc</div>
-              <a href="index.html" class="nav-item active">
+              <a href="{{ route('dashboard') }}" class="nav-item active">
                   <i class="fas fa-chart-pie"></i>
                   Dashboard
               </a>
-              <a href="#" class="nav-item">
+              <a href="{{ route('lines') }}" class="nav-item">
                   <i class="fas fa-route"></i>
                   Ligne
               </a>
-              <a href="#" class="nav-item">
+              <a href="{{ route('agencies') }}" class="nav-item">
                   <i class="fas fa-building"></i>
                   Agence
               </a>
-              <a href="#" class="nav-item">
+              <a href="{{ route('ships') }}" class="nav-item">
                   <i class="fas fa-ship"></i>
                   Navire
               </a>
-              <a href="#" class="nav-item">
+              <a href="{{ route('manifests') }}" class="nav-item">
                   <i class="fas fa-file-contract"></i>
                   Manifeste
               </a>

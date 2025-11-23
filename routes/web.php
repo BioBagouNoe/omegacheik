@@ -14,3 +14,18 @@ Route::get('/login', function () {
 Route::get('/manifest-details', function () {
     return view('manifest_detail.index');
 })->name('manifest-details');
+Route::get('/manifests', function () {
+    return view('manifest.index');
+})->name('manifests');
+Route::get('/lines', function () {
+    return view('line.index');
+})->name('lines');
+Route::get('/agencies', function () {
+    return view('agency.index');
+})->name('agencies');
+Route::get('/ships', function () {
+    return view('ship.index');
+})->name('ships');
+Route::get('/profile', function () {
+    return view('user.profile');
+})->name('profile');

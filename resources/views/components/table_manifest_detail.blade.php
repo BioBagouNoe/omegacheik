@@ -25,13 +25,14 @@
     <table id="vehiclesTable" class="display" style="width:100%">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Immatriculation</th>
+                <th>BL</th>
+                <th>Châssis</th>
                 <th>Marque</th>
-                <th>Modèle</th>
+                <th>Type</th>
                 <th>Année</th>
-                <th>Statut</th>
                 <th>Actions</th>
+
+
             </tr>
         </thead>
         <tbody>
@@ -39,9 +40,8 @@
                 <td>VH-001</td>
                 <td>AB-123-CD</td>
                 <td>Toyota</td>
-                <td>Corolla</td>
-                <td>2022</td>
-                <td><span class="status-badge status-available">Disponible</span></td>
+                <td>-----</td>
+                <td>2024</td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn btn-view" title="Voir">
@@ -63,9 +63,8 @@
                 <td>VH-002</td>
                 <td>EF-456-GH</td>
                 <td>Renault</td>
-                <td>Clio</td>
+                <td>-----</td>
                 <td>2021</td>
-                <td><span class="status-badge status-maintenance">Maintenance</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn btn-view" title="Voir">
@@ -87,9 +86,8 @@
                 <td>VH-003</td>
                 <td>IJ-789-KL</td>
                 <td>Peugeot</td>
-                <td>308</td>
+                <td>-----</td>
                 <td>2023</td>
-                <td><span class="status-badge status-reserved">Réservé</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn btn-view" title="Voir">
@@ -111,9 +109,8 @@
                 <td>VH-004</td>
                 <td>MN-012-OP</td>
                 <td>Citroën</td>
-                <td>C4</td>
+                <td>-----</td>
                 <td>2020</td>
-                <td><span class="status-badge status-out-of-service">Hors service</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn btn-view" title="Voir">

@@ -11,16 +11,16 @@
                 <form id="manifestForm">
                     <!-- Numéro de voyage et Navire -->
                     <div class="form-row d-flex gap-3 mb-3">
-                        <div class="form-group flex-fill">
-                            <label class="form-label" for="num_travel">Numéro de voyage</label>
-                            <input type="text" class="form-control" id="num_travel" required>
-                        </div>
-                        <div class="form-group flex-fill">
+                         <div class="form-group flex-fill">
                             <label class="form-label" for="id_nav">Navire</label>
                             <select class="form-control" id="id_nav" required>
                                 <option value="">Sélectionner un navire</option>
                                 <!-- Options dynamiques -->
                             </select>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="num_travel">Numéro de voyage</label>
+                            <input type="text" class="form-control" id="num_travel" required>
                         </div>
                     </div>
 
