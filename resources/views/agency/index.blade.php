@@ -217,31 +217,6 @@
                 alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
             });
 
-            $('#agenciesTable').on('click', '.btn-update', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-edit"></i>';
-                    btn.disabled = false;
-                    alert(`Mise à jour effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            });
-
-            $('#agenciesTable').on('click', '.btn-reset', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-undo"></i>';
-                    btn.disabled = false;
-                    alert(`Réinitialisation effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            });
 
             $('#agenciesTable').on('click', '.btn-delete', function() {
                 const btn = this;
