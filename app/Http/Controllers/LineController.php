@@ -61,6 +61,9 @@ class LineController extends Controller
             'name_line' => 'required|string|max:255',
         ]);
         $line->update($validated);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'name_line' => $line->name_line]);
+        }
         return redirect()->route('lines.index')->with('success', 'Ligne modifiée avec succès');
     }
 

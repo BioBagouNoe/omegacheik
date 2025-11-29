@@ -32,17 +32,23 @@
         </thead>
         <tbody>
             @forelse($lines as $line)
-                <tr>
+                <tr data-line-id="{{ $line->id }}">
                     <td>{{ $line->id }}</td>
-                    <td>{{ $line->name_line }}</td>
+                    <td>
+                        <span class="line-name-text">{{ $line->name_line }}</span>
+                        <input type="text" class="form-control line-name-input" value="{{ $line->name_line }}" style="display:none; width: 80%;" />
+                    </td>
                     <td>
                         <div class="action-buttons d-flex justify-content-end gap-2">
                             <a href="{{ route('lines.show', $line) }}" class="action-btn btn-view" style="text-decoration: none;" title="Voir">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ route('lines.edit', $line) }}" class="action-btn btn-update" title="Modifier">
+                            <button class="action-btn btn-update" title="Modifier">
                                 <i class="fas fa-edit"></i>
-                            </a>
+                            </button>
+                            <button class="action-btn btn-validate" title="Valider" style="display:none;">
+                                <i class="fas fa-check"></i>
+                            </button>
                             <form action="{{ route('lines.destroy', $line) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
@@ -58,6 +64,54 @@
                     <td colspan="3" class="text-center">Aucune ligne pour le moment.</td>
                 </tr>
             @endforelse
+        </table>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-update').forEach(function(editBtn) {
+                editBtn.addEventListener('click', function() {
+                    const tr = editBtn.closest('tr');
+                    tr.querySelector('.line-name-text').style.display = 'none';
+                    tr.querySelector('.line-name-input').style.display = 'inline-block';
+                    editBtn.style.display = 'none';
+                    tr.querySelector('.btn-validate').style.display = 'inline-block';
+                });
+            });
+
+            document.querySelectorAll('.btn-validate').forEach(function(validateBtn) {
+                validateBtn.addEventListener('click', function() {
+                    const tr = validateBtn.closest('tr');
+                    const lineId = tr.getAttribute('data-line-id');
+                    const input = tr.querySelector('.line-name-input');
+                    const newName = input.value;
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
+
+                    fetch(`/lines/${lineId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ name_line: newName })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+                        return response.json();
+                    })
+                    .then(data => {
+                        tr.querySelector('.line-name-text').textContent = newName;
+                        tr.querySelector('.line-name-text').style.display = 'inline';
+                        input.style.display = 'none';
+                        validateBtn.style.display = 'none';
+                        tr.querySelector('.btn-update').style.display = 'inline-block';
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                    });
+                });
+            });
+        });
+        </script>
         </tbody>
     </table>
 </div>
