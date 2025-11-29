@@ -43,7 +43,7 @@
                             <a href="{{ route('lines.show', $line) }}" class="action-btn btn-view" style="text-decoration: none;" title="Voir">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <button class="action-btn btn-update" title="Modifier">
+                            <button class="action-btn btn-update" title="Modifier" type="button">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="action-btn btn-validate" title="Valider" style="display:none;">
@@ -65,6 +65,9 @@
                 </tr>
             @endforelse
         </table>
+        <div id="line-success-msg" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 30px;border-radius:6px;z-index:9999;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            Modification effectuée avec succès !
+        </div>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.btn-update').forEach(function(editBtn) {
@@ -104,9 +107,13 @@
                         input.style.display = 'none';
                         validateBtn.style.display = 'none';
                         tr.querySelector('.btn-update').style.display = 'inline-block';
+                        // Affiche une notification verte en haut
+                        const msg = document.getElementById('line-success-msg');
+                        msg.style.display = 'block';
+                        setTimeout(() => { msg.style.display = 'none'; }, 5000);
                     })
                     .catch(error => {
-                        alert(error.message);
+                        // Ne rien afficher, ni alert, ni message
                     });
                 });
             });
