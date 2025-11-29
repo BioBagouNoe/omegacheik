@@ -8,4 +8,9 @@ class Line extends Model
 {
     use HasFactory;
     protected $fillable = ['name_line'];
+
+    public function agencies()
+    {
+        return $this->hasMany(Agency::class);
+    }
 }

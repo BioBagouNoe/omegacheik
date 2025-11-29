@@ -60,19 +60,93 @@
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
 
-        saveBtn.addEventListener('click', function() {
-            // Ici, vous ajouteriez la logique pour sauvegarder l'agence
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             const form = document.getElementById('agencyForm');
             if (form.checkValidity()) {
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
                 saveBtn.disabled = true;
-                
-                setTimeout(() => {
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erreur lors de l\'ajout');
+                    return response.json();
+                })
+                .then(data => {
+                    // Affiche une notification verte en haut
+                    const msg = document.createElement('div');
+                    msg.textContent = 'Agence ajoutée avec succès !';
+                    msg.style.display = 'block';
+                    msg.style.position = 'fixed';
+                    msg.style.top = '20px';
+                    msg.style.left = '50%';
+                    msg.style.transform = 'translateX(-50%)';
+                    msg.style.background = '#22c55e';
+                    msg.style.color = '#fff';
+                    msg.style.padding = '10px 30px';
+                    msg.style.borderRadius = '6px';
+                    msg.style.zIndex = '9999';
+                    msg.style.fontWeight = 'bold';
+                    msg.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    document.body.appendChild(msg);
+                    setTimeout(() => { msg.remove(); }, 3000);
+                    closeModal();
+                    // Ajout dynamique dans le tableau sans reload
+                    if (data.agency) {
+                        const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
+                        const newRow = document.createElement('tr');
+                        newRow.setAttribute('data-agency-id', data.agency.id);
+                        newRow.innerHTML = `
+                            <td>${data.agency.id}</td>
+                            <td>
+                                <span class='agency-name-text'>${data.agency.name_agency}</span>
+                                <input type='text' class='form-control agency-name-input' value='${data.agency.name_agency}' style='display:none; width: 80%;' />
+                            </td>
+                            <td>
+                                <span class='agency-line-text'></span>
+                                <select class='form-control agency-line-select' style='display:none; width: 80%;'>
+                                    ${document.getElementById('line_id').innerHTML}
+                                </select>
+                            </td>
+                            <td>
+                                <span class='agency-adress-text'>${data.agency.adress_agency}</span>
+                                <input type='text' class='form-control agency-adress-input' value='${data.agency.adress_agency}' style='display:none; width: 80%;' />
+                            </td>
+                            <td>
+                                <div class='action-buttons d-flex justify-content-end gap-2'>
+                                    <a href='/agencies/${data.agency.id}' class='action-btn btn-view' style='text-decoration: none;' title='Voir'>
+                                        <i class='fas fa-eye'></i>
+                                    </a>
+                                    <button class='action-btn btn-update' title='Modifier' type='button'>
+                                        <i class='fas fa-edit'></i>
+                                    </button>
+                                    <button class='action-btn btn-validate' title='Valider' style='display:none;'>
+                                        <i class='fas fa-check'></i>
+                                    </button>
+                                    <form action='/agencies/${data.agency.id}' method='POST' style='display:inline;'>
+                                        <input type='hidden' name='_token' value='${form.querySelector('input[name="_token"]').value}'>
+                                        <input type='hidden' name='_method' value='DELETE'>
+                                        <button type='submit' class='action-btn btn-delete' title='Supprimer' onclick='return confirm("Voulez-vous vraiment supprimer cette agence ?")'>
+                                            <i class='fas fa-trash'></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        `;
+                        table.appendChild(newRow);
+                    }
+                })
+                .catch(error => {
                     saveBtn.innerHTML = 'Enregistrer';
                     saveBtn.disabled = false;
-                    alert('Véhicule ajouté avec succès !');
-                    closeModal();
-                }, 1500);
+                });
             } else {
                 alert('Veuillez remplir tous les champs obligatoires.');
             }

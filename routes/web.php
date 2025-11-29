@@ -19,12 +19,11 @@ Route::get('/manifests', function () {
 })->name('manifests');
 // Routes CRUD pour les lignes
 Route::resource('lines', App\Http\Controllers\LineController::class);
+// Routes CRUD pour les agences
+Route::resource('agencies', App\Http\Controllers\AgencyController::class);
 
 // Route pour l'import Excel
 Route::post('lines/import', [App\Http\Controllers\LineController::class, 'import'])->name('lines.import');
-Route::get('/agencies', function () {
-    return view('agency.index');
-})->name('agencies');
 Route::get('/ships', function () {
     return view('ship.index');
 })->name('ships');

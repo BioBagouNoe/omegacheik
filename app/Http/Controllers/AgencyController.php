@@ -12,7 +12,8 @@ class AgencyController extends Controller
      */
     public function index()
     {
-        //
+        $agencies = Agency::with('line')->get();
+        return view('agency.index', compact('agencies'));
     }
 
     /**
@@ -20,7 +21,8 @@ class AgencyController extends Controller
      */
     public function create()
     {
-        //
+        $lines = \App\Models\Line::all();
+        return view('agency.create', compact('lines'));
     }
 
     /**
@@ -28,7 +30,16 @@ class AgencyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name_agency' => 'required|string|max:255',
+            'adress_agency' => 'required|string|max:255',
+            'line_id' => 'required|exists:lines,id',
+        ]);
+        $agency = Agency::create($validated);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'agency' => $agency], 201);
+        }
+        return redirect()->route('agencies.index')->with('success', 'Agence créée avec succès');
     }
 
     /**
@@ -36,7 +47,7 @@ class AgencyController extends Controller
      */
     public function show(Agency $agency)
     {
-        //
+        return view('agency.show', compact('agency'));
     }
 
     /**
@@ -44,7 +55,8 @@ class AgencyController extends Controller
      */
     public function edit(Agency $agency)
     {
-        //
+        $lines = \App\Models\Line::all();
+        return view('agency.edit', compact('agency', 'lines'));
     }
 
     /**
@@ -52,7 +64,16 @@ class AgencyController extends Controller
      */
     public function update(Request $request, Agency $agency)
     {
-        //
+        $validated = $request->validate([
+            'name_agency' => 'required|string|max:255',
+            'adress_agency' => 'required|string|max:255',
+            'line_id' => 'required|exists:lines,id',
+        ]);
+        $agency->update($validated);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'agency' => $agency], 200);
+        }
+        return redirect()->route('agencies.index')->with('success', 'Agence modifiée avec succès');
     }
 
     /**
@@ -60,6 +81,7 @@ class AgencyController extends Controller
      */
     public function destroy(Agency $agency)
     {
-        //
+        $agency->delete();
+        return redirect()->route('agencies.index')->with('success', 'Agence supprimée avec succès');
     }
 }
