@@ -217,6 +217,7 @@
                 alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
             });
 
+            
 
             $('#agenciesTable').on('click', '.btn-delete', function() {
                 const btn = this;
