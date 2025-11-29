@@ -17,9 +17,11 @@ Route::get('/manifest-details', function () {
 Route::get('/manifests', function () {
     return view('manifest.index');
 })->name('manifests');
-Route::get('/lines', function () {
-    return view('line.index');
-})->name('lines');
+// Routes CRUD pour les lignes
+Route::resource('lines', App\Http\Controllers\LineController::class);
+
+// Route pour l'import Excel
+Route::post('lines/import', [App\Http\Controllers\LineController::class, 'import'])->name('lines.import');
 Route::get('/agencies', function () {
     return view('agency.index');
 })->name('agencies');

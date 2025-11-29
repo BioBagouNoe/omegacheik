@@ -19,7 +19,7 @@
                   <i class="fas fa-chart-pie"></i>
                   Dashboard
               </a>
-              <a href="{{ route('lines') }}" class="nav-item">
+              <a href="{{ route('lines.index') }}" class="nav-item">
                   <i class="fas fa-route"></i>
                   Ligne
               </a>

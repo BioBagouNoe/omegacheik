@@ -8,8 +8,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="lineForm">
-
+                <form id="lineForm" action="{{ route('lines.store') }}" method="POST">
+                    @csrf
                     <!-- Nom de la ligne -->
                     <div class="form-row d-flex gap-3 mb-3">
                         <div class="form-group flex-fill">
@@ -17,14 +17,14 @@
                             <input type="text" class="form-control" id="name_line" name="name_line" required>
                         </div>
                     </div>
-
-                </form>
-
-
-            </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelBtn">Annuler</button>
                 <button class="btn btn-primary" id="saveBtn">Enregistrer</button>
             </div>
+                </form>
+
+
+            </div>
+
         </div>
     </div>

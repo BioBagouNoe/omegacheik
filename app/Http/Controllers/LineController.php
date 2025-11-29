@@ -32,8 +32,8 @@ class LineController extends Controller
         $validated = $request->validate([
             'name_line' => 'required|string|max:255',
         ]);
-        $line = Line::create($validated);
-        return redirect()->route('lines.index')->with('success', 'Line créée avec succès');
+       Line::create($validated);
+        return redirect()->route('lines.index')->with('success', 'Ligne créée avec succès');
     }
 
     /**
@@ -58,11 +58,10 @@ class LineController extends Controller
     public function update(Request $request, Line $line)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            // Ajoute d'autres champs selon le modèle Line
+            'name_line' => 'required|string|max:255',
         ]);
         $line->update($validated);
-        return redirect()->route('lines.index')->with('success', 'Line modifiée avec succès');
+        return redirect()->route('lines.index')->with('success', 'Ligne modifiée avec succès');
     }
 
     /**
@@ -71,6 +70,6 @@ class LineController extends Controller
     public function destroy(Line $line)
     {
         $line->delete();
-        return redirect()->route('lines.index')->with('success', 'Line supprimée avec succès');
+        return redirect()->route('lines.index')->with('success', 'Ligne supprimée avec succès');
     }
 }
