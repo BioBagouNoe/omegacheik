@@ -10,8 +10,6 @@
                         <i class="fas fa-envelope"></i>
                         <span class="notification-badge">7</span>
                     </button>
-                      <div class="avatar-circle" style="display: inline-flex; align-items: center; margin-left: 10px;">
-                        <img src="https://ui-avatars.com/api/?name=User" alt="Avatar" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid #eee;" />
-                    </div>
+                    
                 </div>
             </header>
