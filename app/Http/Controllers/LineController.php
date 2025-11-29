@@ -17,14 +17,6 @@ class LineController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('line.create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -42,14 +34,6 @@ class LineController extends Controller
     public function show(Line $line)
     {
         return view('line.show', compact('line'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Line $line)
-    {
-        return view('line.edit', compact('line'));
     }
 
     /**
