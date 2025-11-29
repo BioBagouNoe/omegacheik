@@ -12,7 +12,8 @@ class LineController extends Controller
      */
     public function index()
     {
-        //
+        $lines = Line::all();
+        return view('line.index', compact('lines'));
     }
 
     /**
@@ -20,7 +21,7 @@ class LineController extends Controller
      */
     public function create()
     {
-        //
+        return view('line.create');
     }
 
     /**
@@ -28,7 +29,11 @@ class LineController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name_line' => 'required|string|max:255',
+        ]);
+        $line = Line::create($validated);
+        return redirect()->route('lines.index')->with('success', 'Line créée avec succès');
     }
 
     /**
@@ -36,7 +41,7 @@ class LineController extends Controller
      */
     public function show(Line $line)
     {
-        //
+        return view('line.show', compact('line'));
     }
 
     /**
@@ -44,7 +49,7 @@ class LineController extends Controller
      */
     public function edit(Line $line)
     {
-        //
+        return view('line.edit', compact('line'));
     }
 
     /**
@@ -52,7 +57,12 @@ class LineController extends Controller
      */
     public function update(Request $request, Line $line)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            // Ajoute d'autres champs selon le modèle Line
+        ]);
+        $line->update($validated);
+        return redirect()->route('lines.index')->with('success', 'Line modifiée avec succès');
     }
 
     /**
@@ -60,6 +70,7 @@ class LineController extends Controller
      */
     public function destroy(Line $line)
     {
-        //
+        $line->delete();
+        return redirect()->route('lines.index')->with('success', 'Line supprimée avec succès');
     }
 }
