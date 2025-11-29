@@ -31,83 +31,94 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>001</td>
-                <td>Ligne 1</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('agencies')}}" class="action-btn btn-view" style="text-decoration: none;"title="Voir"> <i class="fas fa-eye"></i></a>
+            @forelse($lines as $line)
+                <tr data-line-id="{{ $line->id }}">
+                    <td>{{ $line->id }}</td>
+                    <td>
+                        <span class="line-name-text">{{ $line->name_line }}</span>
+                        <input type="text" class="form-control line-name-input" value="{{ $line->name_line }}" style="display:none; width: 80%;" />
+                    </td>
+                    <td>
+                        <div class="action-buttons d-flex justify-content-end gap-2">
+                            <a href="{{ route('lines.show', $line) }}" class="action-btn btn-view" style="text-decoration: none;" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="action-btn btn-update" title="Modifier" type="button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-validate" title="Valider" style="display:none;">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <form action="{{ route('lines.destroy', $line) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="action-btn btn-delete" title="Supprimer" onclick="return confirm('Voulez-vous vraiment supprimer cette ligne ?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3" class="text-center">Aucune ligne pour le moment.</td>
+                </tr>
+            @endforelse
+        </table>
+        <div id="line-success-msg" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 30px;border-radius:6px;z-index:9999;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            Modification effectuée avec succès !
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-update').forEach(function(editBtn) {
+                editBtn.addEventListener('click', function() {
+                    const tr = editBtn.closest('tr');
+                    tr.querySelector('.line-name-text').style.display = 'none';
+                    tr.querySelector('.line-name-input').style.display = 'inline-block';
+                    editBtn.style.display = 'none';
+                    tr.querySelector('.btn-validate').style.display = 'inline-block';
+                });
+            });
 
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>002</td>
-                <td>Ligne 2</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('agencies')}}" class="action-btn btn-view" style="text-decoration: none;"title="Voir"> <i class="fas fa-eye"></i></a>
+            document.querySelectorAll('.btn-validate').forEach(function(validateBtn) {
+                validateBtn.addEventListener('click', function() {
+                    const tr = validateBtn.closest('tr');
+                    const lineId = tr.getAttribute('data-line-id');
+                    const input = tr.querySelector('.line-name-input');
+                    const newName = input.value;
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
 
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>003</td>
-                <td>Ligne 3</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('agencies')}}" class="action-btn btn-view" style="text-decoration: none;"title="Voir"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>004</td>
-                <td>Ligne 4</td>
-            
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('agencies')}}" class="action-btn btn-view" title="Voir" style="text-decoration: none;"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+                    fetch(`/lines/${lineId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ name_line: newName })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+                        return response.json();
+                    })
+                    .then(data => {
+                        tr.querySelector('.line-name-text').textContent = newName;
+                        tr.querySelector('.line-name-text').style.display = 'inline';
+                        input.style.display = 'none';
+                        validateBtn.style.display = 'none';
+                        tr.querySelector('.btn-update').style.display = 'inline-block';
+                        // Affiche une notification verte en haut
+                        const msg = document.getElementById('line-success-msg');
+                        msg.style.display = 'block';
+                        setTimeout(() => { msg.style.display = 'none'; }, 5000);
+                    })
+                    .catch(error => {
+                        // Ne rien afficher, ni alert, ni message
+                    });
+                });
+            });
+        });
+        </script>
         </tbody>
     </table>
 </div>

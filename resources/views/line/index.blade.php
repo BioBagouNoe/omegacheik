@@ -148,19 +148,6 @@
                 alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
             });
 
-            $('#linesTable').on('click', '.btn-update', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-edit"></i>';
-                    btn.disabled = false;
-                    alert(`Mise à jour effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            });
-
             $('#linesTable').on('click', '.btn-reset', function() {
                 const btn = this;
                 const row = $(this).closest('tr');

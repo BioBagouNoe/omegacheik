@@ -19,11 +19,11 @@
                   <i class="fas fa-chart-pie"></i>
                   Dashboard
               </a>
-              <a href="{{ route('lines') }}" class="nav-item">
+              <a href="{{ route('lines.index') }}" class="nav-item">
                   <i class="fas fa-route"></i>
                   Ligne
               </a>
-              <a href="{{ route('agencies') }}" class="nav-item">
+              <a href="{{ route('agencies.index') }}" class="nav-item">
                   <i class="fas fa-building"></i>
                   Agence
               </a>

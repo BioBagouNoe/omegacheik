@@ -17,12 +17,13 @@ Route::get('/manifest-details', function () {
 Route::get('/manifests', function () {
     return view('manifest.index');
 })->name('manifests');
-Route::get('/lines', function () {
-    return view('line.index');
-})->name('lines');
-Route::get('/agencies', function () {
-    return view('agency.index');
-})->name('agencies');
+// Routes CRUD pour les lignes
+Route::resource('lines', App\Http\Controllers\LineController::class);
+// Routes CRUD pour les agences
+Route::resource('agencies', App\Http\Controllers\AgencyController::class);
+
+// Route pour l'import Excel
+Route::post('lines/import', [App\Http\Controllers\LineController::class, 'import'])->name('lines.import');
 Route::get('/ships', function () {
     return view('ship.index');
 })->name('ships');
