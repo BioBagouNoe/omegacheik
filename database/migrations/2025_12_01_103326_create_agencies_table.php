@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name_agency');
             $table->string('adress_agency');
             $table->foreignIdFor(Line::class);
+            $table->foreignId('pays_id')->constrained('pays')->onDelete('cascade');
             $table->timestamps();
         });
     }

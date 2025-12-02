@@ -23,6 +23,9 @@ Route::get('lines/export', [App\Http\Controllers\LineController::class, 'export'
 
 // Routes CRUD pour les lignes
 Route::resource('lines', App\Http\Controllers\LineController::class);
+// Import/export agences
+Route::post('agencies/import', [App\Http\Controllers\AgencyController::class, 'import'])->name('agencies.import');
+Route::get('agencies/export', [App\Http\Controllers\AgencyController::class, 'export'])->name('agencies.export');
 // Routes CRUD pour les agences
 Route::resource('agencies', App\Http\Controllers\AgencyController::class);
 Route::get('/ships', function () {

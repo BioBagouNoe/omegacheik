@@ -28,6 +28,7 @@
                 <th>ID</th>
                 <th>Nom de l'agence</th>
                 <th>Ligne</th>
+                <th>Pays</th>
                 <th>Adresse</th>
                 <th class="d-flex justify-content-end gap-2">Actions</th>
             </tr>
@@ -47,6 +48,9 @@
                                 <option value="{{ $line->id }}" @if($agency->line_id == $line->id) selected @endif>{{ $line->name_line }}</option>
                             @endforeach
                         </select>
+                    </td>
+                    <td>
+                        <span class="agency-pays-text">{{ $agency->pays->name ?? '' }}</span>
                     </td>
                     <td>
                         <span class="agency-adress-text">{{ $agency->adress_agency }}</span>
@@ -84,6 +88,43 @@
             </div>
             <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Import agences
+                document.querySelector('.btn-import').addEventListener('click', function() {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.csv,.xlsx,.xls';
+                    input.click();
+                    input.addEventListener('change', function() {
+                        if (this.files.length > 0) {
+                            const formData = new FormData();
+                            formData.append('file', this.files[0]);
+                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
+                            fetch('/agencies/import', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': token
+                                },
+                                body: formData
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error('Erreur lors de l\'import');
+                                return response.json();
+                            })
+                            .then(data => {
+                                location.reload();
+                            })
+                            .catch(error => {
+                                alert('Erreur lors de l\'import.');
+                            });
+                        }
+                    });
+                });
+
+                // Export agences
+                document.querySelector('.btn-export').addEventListener('click', function() {
+                    window.location.href = '/agencies/export';
+                });
+
                 document.querySelectorAll('.btn-update').forEach(function(editBtn) {
                     editBtn.addEventListener('click', function() {
                         const tr = editBtn.closest('tr');
