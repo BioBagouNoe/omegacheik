@@ -31,25 +31,16 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-   public function store(LoginRequest $request): RedirectResponse
+public function store(LoginRequest $request): RedirectResponse
 {
+    // Laravel authentifie l'utilisateur via le LoginRequest
     $request->authenticate();
 
+    // Régénère la session (sécurité)
     $request->session()->regenerate();
 
-    $user = Auth::user();
-
-    // Redirection selon le rôle
-    if ($user->hasRole('etudiant')) {
-        return redirect()->route('student-dashboard');
-    } elseif ($user->hasRole('admin')) {
-        return redirect()->route('university-dashboard');
-    } elseif ($user->hasRole('dev')) {
-        return redirect()->route('dev');
-    }
-
-    // Fallback si aucun rôle
-    return redirect()->route('dashboard');
+    // Redirection unique pour tout le monde
+    return redirect()->intended(route('dashboard'));
 }
 
 

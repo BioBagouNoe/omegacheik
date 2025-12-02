@@ -3,9 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\LineController;
+use App\Http\Controllers\AgencyController;
 
+// ====================
+// Routes publiques (accessibles sans être connecté)
+// ====================
 
+// Page d'accueil
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
+// Login
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
     ->name('login');
@@ -13,44 +23,46 @@ Route::get('/login', [AuthenticatedSessionController::class, 'create'])
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
-
-// Page d'inscription
+// Register
 Route::get('/register', [RegisteredUserController::class, 'create'])
     ->middleware('guest')
     ->name('register');
 
-// Traitement du formulaire d'inscription
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest');
 
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/dashboard', function () {
-    return view('dashboard.index');
-})->name('dashboard');
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-Route::get('/manifest-details', function () {
-    return view('manifest_detail.index');
-})->name('manifest-details');
-Route::get('/manifests', function () {
-    return view('manifest.index');
-})->name('manifests');
-// Routes CRUD pour les lignes
-Route::resource('lines', App\Http\Controllers\LineController::class);
-// Routes CRUD pour les agences
-Route::resource('agencies', App\Http\Controllers\AgencyController::class);
+// ====================
+// Routes protégées (nécessite d'être authentifié)
+// ====================
 
-// Route pour l'import Excel
-Route::post('lines/import', [App\Http\Controllers\LineController::class, 'import'])->name('lines.import');
-Route::get('/ships', function () {
-    return view('ship.index');
-})->name('ships');
-Route::get('/profile', function () {
-    return view('user.profile');
-})->name('profile');
+Route::middleware('auth')->group(function () {
+
+    // Logout
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard.index');
+    })->name('dashboard');
+
+    // Manifestes
+    Route::view('/manifests', 'manifest.index')->name('manifests');
+    Route::view('/manifest-details', 'manifest_detail.index')->name('manifest-details');
+
+    // Navires
+    Route::view('/ships', 'ship.index')->name('ships');
+
+    // Profil utilisateur
+    Route::view('/profile', 'user.profile')->name('profile');
+
+    // CRUD Lignes
+    Route::resource('lines', LineController::class);
+
+    // CRUD Agences
+    Route::resource('agencies', AgencyController::class);
+
+    // Import Excel des lignes
+    Route::post('lines/import', [LineController::class, 'import'])
+        ->name('lines.import');
+});

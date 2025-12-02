@@ -54,20 +54,38 @@
           </div>
 
           <div class="nav-section" id="deconnexion">
-              <a href="#" class="nav-item" onclick="alert('Déconnexion en cours...');">
-                  <i class="fas fa-sign-out-alt"></i>
-                  Déconnexion
-              </a>
-          </div>
+            <!-- On enlève complètement le href ou on met javascript:void(0) -->
+            <a href="javascript:void(0)" 
+            class="nav-item" 
+            onclick="event.preventDefault(); logout();"
+            style="cursor: pointer;">
+                <i class="fas fa-sign-out-alt"></i>
+                Déconnexion
+            </a>
+
+            <!-- Formulaire caché -->
+            <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
+                @csrf
+            </form>
+        </div>
       </nav>
 
       <div class="user-profile">
           <div class="user-info">
               <div class="user-avatar">JD</div>
               <div class="user-details">
-                  <h4>John Doe</h4>
+                  <h4>{{Auth::user()->name}}</h4>
                   <p id="user-role">Administrateur</p>
               </div>
           </div>
       </div>
   </aside>
+
+    <script>
+        function logout() {
+            // Optionnel : petite confirmation
+            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                document.getElementById('logout-form').submit();
+            }
+        }
+    </script>
