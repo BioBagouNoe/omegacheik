@@ -66,7 +66,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="3" class="text-center">Aucune ligne pour le moment.</td>
+                <td colspan="3"  class="text-center">Aucune ligne pour le moment.</td>
             </tr>
             @endforelse
     </table>
