@@ -7,14 +7,18 @@
                 <i class="fas fa-plus"></i>
                 Ajouter
             </button>
-            <button class="action-btn btn-import">
-                <i class="fas fa-upload"></i>
-                Importer
-            </button>
-            <button class="action-btn btn-export">
+            <form id="importForm" action="{{ route('lines.import') }}" method="POST" enctype="multipart/form-data" style="display:inline;">
+                @csrf
+                <input type="file" id="importFileInput" name="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="document.getElementById('importForm').submit();">
+                <button type="button" class="action-btn btn-import" onclick="document.getElementById('importFileInput').click();">
+                    <i class="fas fa-upload"></i>
+                    Importer
+                </button>
+            </form>
+            <a href="{{ route('lines.export') }}" class="action-btn btn-export">
                 <i class="fas fa-download"></i>
                 Exporter
-            </button>
+            </a>
             <button class="action-btn btn-filter">
                 <i class="fas fa-filter"></i>
                 Filtrer
