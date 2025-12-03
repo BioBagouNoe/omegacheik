@@ -51,6 +51,12 @@
                     </td>
                     <td>
                         <span class="agency-pays-text">{{ $agency->pays->name ?? '' }}</span>
+                        <select class="form-control agency-pays-select" style="display:none; width: 80%;">
+                            <option value="">Aucun pays</option>
+                            @foreach(App\Models\Pays::all() as $pays)
+                                <option value="{{ $pays->id }}" @if($agency->pays_id == $pays->id) selected @endif>{{ $pays->name }}</option>
+                            @endforeach
+                        </select>
                     </td>
                     <td>
                         <span class="agency-adress-text">{{ $agency->adress_agency }}</span>
@@ -132,6 +138,8 @@
                         tr.querySelector('.agency-name-input').style.display = 'inline-block';
                         tr.querySelector('.agency-line-text').style.display = 'none';
                         tr.querySelector('.agency-line-select').style.display = 'inline-block';
+                        tr.querySelector('.agency-pays-text').style.display = 'none';
+                        tr.querySelector('.agency-pays-select').style.display = 'inline-block';
                         editBtn.style.display = 'none';
                         tr.querySelector('.btn-validate').style.display = 'inline-block';
                     });
@@ -143,10 +151,11 @@
                         const agencyId = tr.getAttribute('data-agency-id');
                         const nameInput = tr.querySelector('.agency-name-input');
                         const lineSelect = tr.querySelector('.agency-line-select');
+                        const paysSelect = tr.querySelector('.agency-pays-select');
                         const newName = nameInput.value;
                         const newLineId = lineSelect.value;
+                        const newPaysId = paysSelect.value;
                         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
-                        // Ajout du champ adresse
                         let adressInput = tr.querySelector('.agency-adress-input');
                         let newAdress = adressInput ? adressInput.value : '';
 
@@ -157,7 +166,7 @@
                                 'X-CSRF-TOKEN': token,
                                 'Accept': 'application/json',
                             },
-                            body: JSON.stringify({ name_agency: newName, line_id: newLineId, adress_agency: newAdress })
+                            body: JSON.stringify({ name_agency: newName, line_id: newLineId, pays_id: newPaysId !== '' ? newPaysId : null, adress_agency: newAdress })
                         })
                         .then(response => {
                             if (!response.ok) throw new Error('Erreur lors de la mise à jour');
@@ -170,6 +179,9 @@
                             tr.querySelector('.agency-line-text').textContent = lineSelect.options[lineSelect.selectedIndex].text;
                             tr.querySelector('.agency-line-text').style.display = 'inline';
                             lineSelect.style.display = 'none';
+                            tr.querySelector('.agency-pays-text').textContent = paysSelect.options[paysSelect.selectedIndex].text;
+                            tr.querySelector('.agency-pays-text').style.display = 'inline';
+                            paysSelect.style.display = 'none';
                             if (adressInput) {
                                 tr.querySelector('.agency-adress-text').textContent = newAdress;
                                 tr.querySelector('.agency-adress-text').style.display = 'inline';

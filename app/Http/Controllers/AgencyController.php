@@ -84,9 +84,11 @@ class AgencyController extends Controller
             'name_agency' => 'required|string|max:255',
             'adress_agency' => 'required|string|max:255',
             'line_id' => 'required|exists:lines,id',
+            'pays_id' => 'nullable|exists:pays,id',
         ]);
         $agency->update($validated);
         if ($request->expectsJson() || $request->ajax()) {
+            $agency->load('line', 'pays');
             return response()->json(['success' => true, 'agency' => $agency], 200);
         }
         return redirect()->route('agencies.index')->with('success', 'Agence modifiée avec succès');
