@@ -34,86 +34,38 @@
             </tr>
         </thead>
         <tbody>
+        @if(isset($ships) && count($ships) > 0)
+            @foreach($ships as $ship)
+                <tr data-id="{{$ship->id}}">
+                    <td>{{$ship->id}}</td>
+                    <td>
+                        <span class="ship-name-text">{{$ship->name_nav}}</span>
+                        <input type="text" class="form-control ship-name-input d-none" value="{{$ship->name_nav}}" />
+                    </td>
+                    <td>
+                        <span class="ship-line-text">{{$ship->line ? $ship->line->name_line : ''}}</span>
+                        <select class="form-control ship-line-select d-none">
+                            @foreach($lines as $line)
+                                <option value="{{$line->id}}" @if($ship->line && $ship->line->id == $line->id) selected @endif>{{$line->name_line}}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td>
+                        <div class="action-buttons d-flex justify-content-end gap-2">
+                            <a href="#" class="action-btn btn-view" title="Voir" style="text-decoration: none;"> <i class="fas fa-eye"></i></a>
+                            <button class="action-btn btn-update" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn btn-save d-none" title="Enregistrer"><i class="fas fa-check"></i></button>
+                            <button class="action-btn btn-cancel d-none" title="Annuler"><i class="fas fa-times"></i></button>
+                            <button class="action-btn btn-delete" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+        @else
             <tr>
-                <td>NV-001</td>
-                <td>Navire Centrale</td>
-                <td>Ligne 1</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('manifest-details')}}" class="action-btn btn-view" style="text-decoration: none;" title="Voir"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
+                <td colspan="4" class="text-center">Aucun navire trouvé.</td>
             </tr>
-            <tr>
-                <td>NV-002</td>
-                <td>Navire Nord</td>
-                <td>Ligne 2</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('manifest-details')}}" class="action-btn btn-view" style="text-decoration: none;" title="Voir"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>NV-003</td>
-                <td>Navire Est</td>
-                <td>Ligne 3</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('manifest-details')}}" class="action-btn btn-view" style="text-decoration: none;" title="Voir"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>NV-004</td>
-                <td>Navire Sud</td>
-                <td>Ligne 4</td>
-                <td>
-                    <div class="action-buttons d-flex justify-content-end gap-2">
-                        <a href="{{route('manifest-details')}}" class="action-btn btn-view" title="Voir" style="text-decoration: none;"> <i class="fas fa-eye"></i></a>
-
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+        @endif
         </tbody>
     </table>
 </div>

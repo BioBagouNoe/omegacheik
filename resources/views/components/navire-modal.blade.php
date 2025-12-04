@@ -20,9 +20,13 @@
 
                         <div class="form-group flex-fill">
                             <label class="form-label" for="id_line">Ligne</label>
-                            <select class="form-control" id="id_line" required>
+                            <select class="form-control" id="id_line" name="line_id" required>
                                 <option value="">Sélectionner une ligne</option>
-                                <!-- Options dynamiques -->
+                                @if(isset($lines) && count($lines) > 0)
+                                    @foreach($lines as $line)
+                                        <option value="{{$line->id}}">{{$line->name_line}}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                     </div>

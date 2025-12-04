@@ -7,9 +7,10 @@
                 <i class="fas fa-plus"></i>
                 Ajouter
             </button>
-            <button class="action-btn btn-import">
+            <button class="action-btn btn-import" id="btnImportAgency">
                 <i class="fas fa-upload"></i>
-                Importer
+                <span class="import-text">Importer</span>
+                <span class="import-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Importation...</span>
             </button>
             <button class="action-btn btn-export">
                 <i class="fas fa-download"></i>
@@ -25,7 +26,6 @@
     <table id="agenciesTable" class="display" style="width:100%">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nom de l'agence</th>
                 <th>Ligne</th>
                 <th>Pays</th>
@@ -34,9 +34,9 @@
             </tr>
         </thead>
         <tbody>
+            <div id="agency-import-errors" style="display:none; margin-bottom:10px; color:#dc2626; font-weight:bold;"></div>
             @forelse($agencies as $agency)
                 <tr data-agency-id="{{ $agency->id }}">
-                    <td>{{ $agency->id }}</td>
                     <td>
                         <span class="agency-name-text">{{ $agency->name_agency }}</span>
                         <input type="text" class="form-control agency-name-input" value="{{ $agency->name_agency }}" style="display:none; width: 80%;" />
@@ -50,11 +50,11 @@
                         </select>
                     </td>
                     <td>
-                        <span class="agency-pays-text">{{ $agency->pays->name ?? '' }}</span>
+                        <span class="agency-pays-text">{{ $agency->pays->nom ?? '' }}</span>
                         <select class="form-control agency-pays-select" style="display:none; width: 80%;">
                             <option value="">Aucun pays</option>
                             @foreach(App\Models\Pays::all() as $pays)
-                                <option value="{{ $pays->id }}" @if($agency->pays_id == $pays->id) selected @endif>{{ $pays->name }}</option>
+                                <option value="{{ $pays->id }}" @if($agency->pays_id == $pays->id) selected @endif>{{ $pays->nom }}</option>
                             @endforeach
                         </select>
                     </td>
@@ -95,13 +95,17 @@
             <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Import agences
-                document.querySelector('.btn-import').addEventListener('click', function() {
+                document.getElementById('btnImportAgency').addEventListener('click', function() {
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.accept = '.csv,.xlsx,.xls';
                     input.click();
                     input.addEventListener('change', function() {
                         if (this.files.length > 0) {
+                            const btn = document.getElementById('btnImportAgency');
+                            btn.querySelector('.import-text').style.display = 'none';
+                            btn.querySelector('.import-loading').style.display = 'inline-block';
+                            btn.disabled = true;
                             const formData = new FormData();
                             formData.append('file', this.files[0]);
                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
@@ -112,14 +116,25 @@
                                 },
                                 body: formData
                             })
-                            .then(response => {
-                                if (!response.ok) throw new Error('Erreur lors de l\'import');
-                                return response.json();
-                            })
-                            .then(data => {
-                                location.reload();
+                            .then(async response => {
+                                const data = await response.json();
+                                btn.querySelector('.import-text').style.display = 'inline-block';
+                                btn.querySelector('.import-loading').style.display = 'none';
+                                btn.disabled = false;
+                                if (response.ok && data.success) {
+                                    location.reload();
+                                } else if (data.errors) {
+                                    const errorDiv = document.getElementById('agency-import-errors');
+                                    errorDiv.innerHTML = data.errors.map(e => `<div>${e}</div>`).join('');
+                                    errorDiv.style.display = 'block';
+                                } else {
+                                    alert('Erreur lors de l\'import.');
+                                }
                             })
                             .catch(error => {
+                                btn.querySelector('.import-text').style.display = 'inline-block';
+                                btn.querySelector('.import-loading').style.display = 'none';
+                                btn.disabled = false;
                                 alert('Erreur lors de l\'import.');
                             });
                         }
@@ -140,6 +155,8 @@
                         tr.querySelector('.agency-line-select').style.display = 'inline-block';
                         tr.querySelector('.agency-pays-text').style.display = 'none';
                         tr.querySelector('.agency-pays-select').style.display = 'inline-block';
+                        tr.querySelector('.agency-adress-text').style.display = 'none';
+                        tr.querySelector('.agency-adress-input').style.display = 'inline-block';
                         editBtn.style.display = 'none';
                         tr.querySelector('.btn-validate').style.display = 'inline-block';
                     });

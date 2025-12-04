@@ -13,7 +13,11 @@ class AgencyController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
-        Excel::import(new \App\Imports\AgenciesImport, $request->file('file'));
+        $import = new \App\Imports\AgenciesImport;
+        Excel::import($import, $request->file('file'));
+        if (count($import->errors) > 0) {
+            return response()->json(['success' => false, 'errors' => $import->errors], 422);
+        }
         return response()->json(['success' => true]);
     }
 

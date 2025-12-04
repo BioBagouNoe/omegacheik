@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ship;
+use App\Models\Line;
+use App\Imports\ShipsImport;
+use App\Exports\ShipsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class ShipController extends Controller
@@ -12,7 +16,9 @@ class ShipController extends Controller
      */
     public function index()
     {
-        //
+        $ships = Ship::with('line')->get();
+        $lines = Line::all();
+        return view('ship.index', compact('ships', 'lines'));
     }
 
     /**
@@ -28,7 +34,12 @@ class ShipController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name_nav' => 'required',
+            'line_id' => 'required|exists:lines,id',
+        ]);
+        Ship::create($request->only('name_nav', 'line_id'));
+        return redirect()->back()->with('success', 'Navire ajouté !');
     }
 
     /**
@@ -52,7 +63,12 @@ class ShipController extends Controller
      */
     public function update(Request $request, Ship $ship)
     {
-        //
+        $request->validate([
+            'name_nav' => 'required',
+            'line_id' => 'required|exists:lines,id',
+        ]);
+        $ship->update($request->only('name_nav', 'line_id'));
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -60,6 +76,23 @@ class ShipController extends Controller
      */
     public function destroy(Ship $ship)
     {
-        //
+        $ship->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // Import ships from Excel/CSV
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new ShipsImport, $request->file('file'));
+        return redirect()->back()->with('success', 'Importation terminée !');
+    }
+
+    // Export ships to Excel/CSV
+    public function export()
+    {
+        return Excel::download(new ShipsExport, 'navires.xlsx');
     }
 }

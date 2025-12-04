@@ -15,7 +15,7 @@ class AgenciesExport implements FromCollection, WithHeadings
                 'ID' => $agency->id,
                 'Nom de l\'agence' => $agency->name_agency,
                 'Ligne' => $agency->line->name_line ?? '',
-                'Pays' => $agency->pays->name ?? '',
+                'Pays' => $agency->pays->nom ?? '',
                 'Adresse' => $agency->adress_agency,
             ];
         });

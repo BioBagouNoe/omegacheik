@@ -30,7 +30,6 @@
     <table id="linesTable" class="display" style="width:100%">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nom</th>
                 <th class=" d-flex justify-content-end gap-2">Actions</th>
             </tr>
@@ -38,7 +37,6 @@
         <tbody>
             @forelse($lines as $line)
             <tr data-line-id="{{ $line->id }}">
-                <td>{{ $line->id }}</td>
                 <td>
                     <span class="line-name-text">{{ $line->name_line }}</span>
                     <input type="text" class="form-control line-name-input" value="{{ $line->name_line }}" style="display:none; width: 80%;" />
