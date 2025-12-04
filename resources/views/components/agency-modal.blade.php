@@ -10,7 +10,7 @@
             <div class="modal-body">
                 <form id="agencyForm" action="{{ route('agencies.store') }}" method="POST">
                     @csrf
-                    <!-- Nom de l’agence, Adresse et Ligne -->
+                    <!-- Nom de l’agence, Ligne et Pays -->
                     <div class="form-row d-flex gap-2 mb-3">
                         <div class="form-group flex-fill">
                             <label class="form-label" for="name_agency">Nom de l’agence</label>
@@ -26,9 +26,20 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group flex-fill">
-                        <label class="form-label" for="adress_agency">Adresse de l’agence</label>
-                        <input type="text" class="form-control" id="adress_agency" name="adress_agency" required>
+                    <div class="form-row d-flex gap-2 mb-3">
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="adress_agency">Adresse de l’agence</label>
+                            <input type="text" class="form-control" id="adress_agency" name="adress_agency" required>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="pays_id">Pays</label>
+                            <select class="form-control" id="pays_id" name="pays_id" required>
+                                <option value="">Sélectionner un pays</option>
+                                @foreach(App\Models\Pays::all() as $pays)
+                                <option value="{{ $pays->id }}">{{ $pays->nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" id="cancelBtn">Annuler</button>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Line;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\LinesImport;
+use App\Exports\LinesExport;
 use Illuminate\Http\Request;
 
 class LineController extends Controller
@@ -58,5 +61,25 @@ class LineController extends Controller
     {
         $line->delete();
         return redirect()->route('lines.index')->with('success', 'Ligne supprimée avec succès');
+    }
+
+    /**
+     * Importer des lignes depuis un fichier Excel/CSV.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+        Excel::import(new LinesImport, $request->file('file'));
+        return redirect()->route('lines.index')->with('success', 'Importation terminée avec succès');
+    }
+
+    /**
+     * Exporter les lignes vers un fichier Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new LinesExport, 'lines.xlsx');
     }
 }

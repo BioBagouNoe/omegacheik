@@ -98,9 +98,14 @@
                     document.body.appendChild(msg);
                     setTimeout(() => { msg.remove(); }, 3000);
                     closeModal();
+                    // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
+                    const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
+                    const emptyRow = table.querySelector('tr td[colspan]');
+                    if (emptyRow) {
+                        emptyRow.parentElement.remove();
+                    }
                     // Ajout dynamique dans le tableau sans reload
                     if (data.agency) {
-                        const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
                         const newRow = document.createElement('tr');
                         newRow.setAttribute('data-agency-id', data.agency.id);
                         newRow.innerHTML = `
@@ -114,6 +119,9 @@
                                 <select class='form-control agency-line-select' style='display:none; width: 80%;'>
                                     ${document.getElementById('line_id').innerHTML}
                                 </select>
+                            </td>
+                            <td>
+                                <span class='agency-pays-text'></span>
                             </td>
                             <td>
                                 <span class='agency-adress-text'>${data.agency.adress_agency}</span>

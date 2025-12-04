@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Agency extends Model
 {
-    protected $fillable = ['name_agency', 'adress_agency', 'line_id'];
+    protected $fillable = ['name_agency', 'adress_agency', 'line_id', 'pays_id'];
 
     public function line()
     {
         return $this->belongsTo(Line::class);
+    }
+
+    public function pays()
+    {
+        return $this->belongsTo(Pays::class);
     }
 }

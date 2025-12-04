@@ -142,12 +142,6 @@
             });
 
             // Table Action Buttons
-            $('#linesTable').on('click', '.btn-view', function() {
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
-            });
-
             $('#linesTable').on('click', '.btn-reset', function() {
                 const btn = this;
                 const row = $(this).closest('tr');
@@ -159,20 +153,6 @@
                     btn.disabled = false;
                     alert(`Réinitialisation effectuée pour ${rowData[0]} (${rowData[1]})`);
                 }, 1500);
-            });
-
-            $('#linesTable').on('click', '.btn-delete', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                if (confirm(`Voulez-vous vraiment supprimer ${rowData[0]} (${rowData[1]}) ?`)) {
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    btn.disabled = true;
-                    setTimeout(() => {
-                        table.row(row).remove().draw();
-                        alert(`Suppression effectuée pour ${rowData[0]} (${rowData[1]})`);
-                    }, 1500);
-                }
             });
         });
     </script>
