@@ -34,6 +34,7 @@ class ShipController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         $request->validate([
             'name_nav' => 'required',
             'line_id' => 'required|exists:lines,id',
@@ -86,8 +87,12 @@ class ShipController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
-        Excel::import(new ShipsImport, $request->file('file'));
-        return redirect()->back()->with('success', 'Importation terminée !');
+        $import = new ShipsImport;
+        Excel::import($import, $request->file('file'));
+        if (count($import->errors) > 0) {
+            return response()->json(['success' => false, 'errors' => $import->errors], 422);
+        }
+        return response()->json(['success' => true]);
     }
 
     // Export ships to Excel/CSV

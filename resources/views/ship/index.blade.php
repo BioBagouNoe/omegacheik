@@ -67,12 +67,6 @@
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
                 saveBtn.disabled = true;
                 
-                setTimeout(() => {
-                    saveBtn.innerHTML = 'Enregistrer';
-                    saveBtn.disabled = false;
-                    alert('Véhicule ajouté avec succès !');
-                    closeModal();
-                }, 1500);
             } else {
                 alert('Veuillez remplir tous les champs obligatoires.');
             }
@@ -141,46 +135,6 @@
                 const row = $(this).closest('tr');
                 const rowData = table.row(row).data();
                 alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
-            });
-
-            $('#naviresTable').on('click', '.btn-update', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-edit"></i>';
-                    btn.disabled = false;
-                    alert(`Mise à jour effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            });
-
-            $('#naviresTable').on('click', '.btn-reset', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-undo"></i>';
-                    btn.disabled = false;
-                    alert(`Réinitialisation effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            });
-
-            $('#naviresTable').on('click', '.btn-delete', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const rowData = table.row(row).data();
-                if (confirm(`Voulez-vous vraiment supprimer ${rowData[0]} (${rowData[1]}) ?`)) {
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    btn.disabled = true;
-                    setTimeout(() => {
-                        table.row(row).remove().draw();
-                        alert(`Suppression effectuée pour ${rowData[0]} (${rowData[1]})`);
-                    }, 1500);
-                }
             });
         });
         

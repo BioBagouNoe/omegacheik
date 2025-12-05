@@ -75,7 +75,7 @@
                 setTimeout(() => {
                     saveBtn.innerHTML = 'Enregistrer';
                     saveBtn.disabled = false;
-                    alert('Véhicule ajouté avec succès !');
+                    alert('Ligne ajoutée avec succès !');
                     closeModal();
                 }, 1500);
             } else {

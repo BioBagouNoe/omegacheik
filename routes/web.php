@@ -28,9 +28,12 @@ Route::post('agencies/import', [App\Http\Controllers\AgencyController::class, 'i
 Route::get('agencies/export', [App\Http\Controllers\AgencyController::class, 'export'])->name('agencies.export');
 // Routes CRUD pour les agences
 Route::resource('agencies', App\Http\Controllers\AgencyController::class);
-Route::get('/ships', function () {
-    return view('ship.index');
-})->name('ships');
+
+// Import/export navires
+Route::post('ships/import', [App\Http\Controllers\ShipController::class, 'import'])->name('ships.import');
+Route::get('ships/export', [App\Http\Controllers\ShipController::class, 'export'])->name('ships.export');
+// Routes CRUD pour les navires
+Route::resource('ships', App\Http\Controllers\ShipController::class);
 Route::get('/profile', function () {
     return view('user.profile');
 })->name('profile');
