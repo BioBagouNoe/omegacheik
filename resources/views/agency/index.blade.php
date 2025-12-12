@@ -250,59 +250,63 @@
         </section>
     </main>
 </div>
-<!-- Add Agency Modal -->
-    <!-- Modal d'ajout de véhicule -->
-    <div class="modal" id="addAgencyModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Ajouter une agence</h3>
-                <button class="modal-close" id="closeModalBtn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="agencyForm" action="{{ route('agencies.store') }}" method="POST">
-                    @csrf
-                    <!-- Nom de l’agence, Ligne et Pays -->
-                    <div class="form-row d-flex gap-2 mb-3">
-                        <div class="form-group flex-fill">
-                            <label class="form-label" for="name_agency">Nom de l’agence</label>
-                            <input type="text" class="form-control" id="name_agency" name="name_agency" required>
-                        </div>
-                        <div class="form-group flex-fill">
-                            <label class="form-label" for="line_id">Ligne</label>
-                            <select class="form-control" id="line_id" name="line_id" required>
-                                <option value="">Sélectionner une ligne</option>
-                                @foreach(App\Models\Line::all() as $line)
-                                <option value="{{ $line->id }}">{{ $line->name_line }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row d-flex gap-2 mb-3">
-                        <div class="form-group flex-fill">
-                            <label class="form-label" for="adress_agency">Adresse de l’agence</label>
-                            <input type="text" class="form-control" id="adress_agency" name="adress_agency" required>
-                        </div>
-                        <div class="form-group flex-fill">
-                            <label class="form-label" for="pays_id">Pays</label>
-                            <select class="form-control" id="pays_id" name="pays_id" required>
-                                <option value="">Sélectionner un pays</option>
-                                @foreach(App\Models\Pays::all() as $pays)
-                                <option value="{{ $pays->id }}">{{ $pays->nom }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" id="cancelBtn">Annuler</button>
-                        <button class="btn btn-primary" id="saveBtn">Enregistrer</button>
-                    </div>
-                </form>
 
-            </div>
+<!-- Add Agency Modal -->
+<!-- Modal d'ajout de véhicule -->
+<div class="modal" id="addAgencyModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Ajouter une agence</h3>
+            <!-- type="button" ajouté pour éviter un submit accidentel -->
+            <button type="button" class="modal-close" id="closeModalBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="agencyForm" action="{{ route('agencies.store') }}" method="POST">
+                @csrf
+                <!-- Nom de l’agence, Ligne et Pays -->
+                <div class="form-row d-flex gap-2 mb-3">
+                    <div class="form-group flex-fill">
+                        <label class="form-label" for="name_agency">Nom de l’agence</label>
+                        <input type="text" class="form-control" id="name_agency" name="name_agency" required>
+                    </div>
+                    <div class="form-group flex-fill">
+                        <label class="form-label" for="line_id">Ligne</label>
+                        <select class="form-control" id="line_id" name="line_id" required>
+                            <option value="">Sélectionner une ligne</option>
+                            @foreach(App\Models\Line::all() as $line)
+                            <option value="{{ $line->id }}">{{ $line->name_line }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row d-flex gap-2 mb-3">
+                    <div class="form-group flex-fill">
+                        <label class="form-label" for="adress_agency">Adresse de l’agence</label>
+                        <input type="text" class="form-control" id="adress_agency" name="adress_agency" required>
+                    </div>
+                    <div class="form-group flex-fill">
+                        <label class="form-label" for="pays_id">Pays</label>
+                        <select class="form-control" id="pays_id" name="pays_id" required>
+                            <option value="">Sélectionner un pays</option>
+                            @foreach(App\Models\Pays::all() as $pays)
+                            <option value="{{ $pays->id }}">{{ $pays->nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- type="button" pour empêcher le submit automatique -->
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Annuler</button>
+                    <!-- type="button" car on utilise fetch() pour envoyer -->
+                    <button type="button" class="btn btn-primary" id="saveBtn">Enregistrer</button>
+                </div>
+            </form>
+
         </div>
     </div>
+</div>
 
 <script>
     // Mobile Menu Toggle
@@ -310,138 +314,193 @@
     const sidebar = document.getElementById('sidebar');
     const mobileOverlay = document.getElementById('mobileOverlay');
 
-    mobileMenuBtn.addEventListener('click', function() {
-        sidebar.classList.add('mobile-open');
-        mobileOverlay.classList.add('active');
-    });
+    // guard: si le bouton n'existe pas, on évite une erreur JS
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            sidebar.classList.add('mobile-open');
+            mobileOverlay.classList.add('active');
+        });
+    }
 
-    mobileOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('mobile-open');
-        mobileOverlay.classList.remove('active');
-    });
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
+        });
+    }
 
     // Modal Functionality
     const addAgencyModal = document.getElementById('addAgencyModal');
-    const addAgencyBtn = document.getElementById('addAgencyBtn');
+    const addAgencyBtn = document.getElementById('addAgencyBtn'); // existe dans la page
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const saveBtn = document.getElementById('saveBtn');
 
-    addAgencyBtn.addEventListener('click', function() {
-        addAgencyModal.classList.add('active');
-    });
+    if (addAgencyBtn) {
+        // s'assurer que le bouton d'ouverture ne soumet pas si dans un form parent
+        addAgencyBtn.setAttribute('type', 'button');
+        addAgencyBtn.addEventListener('click', function() {
+            addAgencyModal.classList.add('active');
+        });
+    }
 
     function closeModal() {
         addAgencyModal.classList.remove('active');
-        document.getElementById('agencyForm').reset();
+        const f = document.getElementById('agencyForm');
+        if (f) f.reset();
     }
 
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal();
+        });
+    }
 
-    saveBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const form = document.getElementById('agencyForm');
-        if (form.checkValidity()) {
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
-            saveBtn.disabled = true;
-            const formData = new FormData(form);
-            fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Erreur lors de l\'ajout');
-                    return response.json();
-                })
-                .then(data => {
-                    // Affiche une notification verte en haut
-                    const msg = document.createElement('div');
-                    msg.textContent = 'Agence ajoutée avec succès !';
-                    msg.style.display = 'block';
-                    msg.style.position = 'fixed';
-                    msg.style.top = '20px';
-                    msg.style.left = '50%';
-                    msg.style.transform = 'translateX(-50%)';
-                    msg.style.background = '#22c55e';
-                    msg.style.color = '#fff';
-                    msg.style.padding = '10px 30px';
-                    msg.style.borderRadius = '6px';
-                    msg.style.zIndex = '9999';
-                    msg.style.fontWeight = 'bold';
-                    msg.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                    document.body.appendChild(msg);
-                    setTimeout(() => {
-                        msg.remove();
-                    }, 3000);
-                    closeModal();
-                    // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
-                    const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
-                    const emptyRow = table.querySelector('tr td[colspan]');
-                    if (emptyRow) {
-                        emptyRow.parentElement.remove();
-                    }
-                    // Ajout dynamique dans le tableau sans reload
-                    if (data.agency) {
-                        const newRow = document.createElement('tr');
-                        newRow.setAttribute('data-agency-id', data.agency.id);
-                        newRow.innerHTML = `
-                            <td>${data.agency.id}</td>
-                            <td>
-                                <span class='agency-name-text'>${data.agency.name_agency}</span>
-                                <input type='text' class='form-control agency-name-input' value='${data.agency.name_agency}' style='display:none; width: 80%;' />
-                            </td>
-                            <td>
-                                <span class='agency-line-text'></span>
-                                <select class='form-control agency-line-select' style='display:none; width: 80%;'>
-                                    ${document.getElementById('line_id').innerHTML}
-                                </select>
-                            </td>
-                            <td>
-                                <span class='agency-pays-text'></span>
-                            </td>
-                            <td>
-                                <span class='agency-adress-text'>${data.agency.adress_agency}</span>
-                                <input type='text' class='form-control agency-adress-input' value='${data.agency.adress_agency}' style='display:none; width: 80%;' />
-                            </td>
-                            <td>
-                                <div class='action-buttons d-flex justify-content-end gap-2'>
-                                    <a href='/agencies/${data.agency.id}' class='action-btn btn-view' style='text-decoration: none;' title='Voir'>
-                                        <i class='fas fa-eye'></i>
-                                    </a>
-                                    <button class='action-btn btn-update' title='Modifier' type='button'>
-                                        <i class='fas fa-edit'></i>
-                                    </button>
-                                    <button class='action-btn btn-validate' title='Valider' style='display:none;'>
-                                        <i class='fas fa-check'></i>
-                                    </button>
-                                    <form action='/agencies/${data.agency.id}' method='POST' style='display:inline;'>
-                                        <input type='hidden' name='_token' value='${form.querySelector('input[name="_token"]').value}'>
-                                        <input type='hidden' name='_method' value='DELETE'>
-                                        <button type='submit' class='action-btn btn-delete' title='Supprimer' onclick='return confirm("Voulez-vous vraiment supprimer cette agence ?")'>
-                                            <i class='fas fa-trash'></i>
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            // empêche le submit par défaut et ferme le modal
+            e.preventDefault();
+            closeModal();
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // empêche tout submit par défaut
+            const form = document.getElementById('agencyForm');
+            if (!form) return;
+
+            if (form.checkValidity()) {
+                // feedback UI
+                const originalHtml = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+                saveBtn.disabled = true;
+
+                const formData = new FormData(form);
+                // token CSRF
+                const token = form.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                // IMPORTANT: ne pas définir Content-Type si on envoie FormData
+                fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(async response => {
+                        // si erreur 422 ou autre on récupère le JSON (si fourni)
+                        const text = await response.text();
+                        let data = {};
+                        try { data = JSON.parse(text); } catch (err) { data = {}; }
+
+                        if (!response.ok) {
+                            // si le serveur envoie des erreurs de validation
+                            if (data && data.errors) {
+                                // afficher erreurs côté client (simple)
+                                alert('Erreurs :\n' + Object.values(data.errors).flat().join('\n'));
+                            } else if (data && data.message) {
+                                alert(data.message);
+                            } else {
+                                throw new Error('Erreur lors de l\'ajout');
+                            }
+                            throw new Error('Response not ok');
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        // Notification visuelle
+                        const msg = document.createElement('div');
+                        msg.textContent = 'Agence ajoutée avec succès !';
+                        msg.style.display = 'block';
+                        msg.style.position = 'fixed';
+                        msg.style.top = '20px';
+                        msg.style.left = '50%';
+                        msg.style.transform = 'translateX(-50%)';
+                        msg.style.background = '#22c55e';
+                        msg.style.color = '#fff';
+                        msg.style.padding = '10px 30px';
+                        msg.style.borderRadius = '6px';
+                        msg.style.zIndex = '9999';
+                        msg.style.fontWeight = 'bold';
+                        msg.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                        document.body.appendChild(msg);
+                        setTimeout(() => {
+                            msg.remove();
+                        }, 3000);
+
+                        closeModal();
+
+                        // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
+                        const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
+                        const emptyRow = table ? table.querySelector('tr td[colspan]') : null;
+                        if (emptyRow) {
+                            emptyRow.parentElement.remove();
+                        }
+
+                        // Ajout dynamique dans le tableau sans reload (si le controller renvoie data.agency)
+                        if (data && data.agency && table) {
+                            const newRow = document.createElement('tr');
+                            newRow.setAttribute('data-agency-id', data.agency.id);
+                            newRow.innerHTML = `
+                                <td>${data.agency.id}</td>
+                                <td>
+                                    <span class='agency-name-text'>${data.agency.name_agency}</span>
+                                    <input type='text' class='form-control agency-name-input' value='${data.agency.name_agency}' style='display:none; width: 80%;' />
+                                </td>
+                                <td>
+                                    <span class='agency-line-text'></span>
+                                    <select class='form-control agency-line-select' style='display:none; width: 80%;'>
+                                        ${document.getElementById('line_id') ? document.getElementById('line_id').innerHTML : ''}
+                                    </select>
+                                </td>
+                                <td>
+                                    <span class='agency-pays-text'></span>
+                                </td>
+                                <td>
+                                    <span class='agency-adress-text'>${data.agency.adress_agency || ''}</span>
+                                    <input type='text' class='form-control agency-adress-input' value='${data.agency.adress_agency || ''}' style='display:none; width: 80%;' />
+                                </td>
+                                <td>
+                                    <div class='action-buttons d-flex justify-content-end gap-2'>
+                                        <a href='/agencies/${data.agency.id}' class='action-btn btn-view' style='text-decoration: none;' title='Voir'>
+                                            <i class='fas fa-eye'></i>
+                                        </a>
+                                        <button class='action-btn btn-update' title='Modifier' type='button'>
+                                            <i class='fas fa-edit'></i>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
-                        `;
-                        table.appendChild(newRow);
-                    }
-                })
-                .catch(error => {
-                    saveBtn.innerHTML = 'Enregistrer';
-                    saveBtn.disabled = false;
-                });
-        } else {
-            alert('Veuillez remplir tous les champs obligatoires.');
-        }
-    });
+                                        <button class='action-btn btn-validate' title='Valider' style='display:none;'>
+                                            <i class='fas fa-check'></i>
+                                        </button>
+                                        <form action='/agencies/${data.agency.id}' method='POST' style='display:inline;'>
+                                            <input type='hidden' name='_token' value='${form.querySelector('input[name="_token"]').value}'>
+                                            <input type='hidden' name='_method' value='DELETE'>
+                                            <button type='submit' class='action-btn btn-delete' title='Supprimer' onclick='return confirm("Voulez-vous vraiment supprimer cette agence ?")'>
+                                                <i class='fas fa-trash'></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            `;
+                            table.appendChild(newRow);
+                        }
+                    })
+                    .catch(error => {
+                        // Restaurer le bouton et ne pas afficher d'alert intrusive
+                        saveBtn.innerHTML = 'Enregistrer';
+                        saveBtn.disabled = false;
+                        // Optionnel: log dans la console pour debug
+                        console.error(error);
+                    });
+            } else {
+                alert('Veuillez remplir tous les champs obligatoires.');
+            }
+        });
+    }
 
-    // Initialize DataTable
+    // Initialize DataTable (laissez comme avant)
     $(document).ready(function() {
         const table = $('#agenciesTable').DataTable({
             "language": {
@@ -460,43 +519,9 @@
             }]
         });
 
-        // Button Actions
-        document.querySelector('.btn-export').addEventListener('click', function() {
-            const btn = this;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportation...';
-            btn.disabled = true;
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-download"></i> Exporter';
-                btn.disabled = false;
-                alert('Export terminé avec succès !');
-            }, 1500);
-        });
-
-        document.querySelector('.btn-import').addEventListener('click', function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv,.xlsx,.xls';
-            input.click();
-
-            input.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    const btn = document.querySelector('.btn-import');
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importation...';
-                    btn.disabled = true;
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="fas fa-upload"></i> Importer';
-                        btn.disabled = false;
-                        alert('Import terminé avec succès !');
-                    }, 1500);
-                }
-            });
-        });
-
-        document.querySelector('.btn-filter').addEventListener('click', function() {
-            const filterInput = document.querySelector('.dataTables_filter input');
-            if (filterInput) {
-                filterInput.focus();
-            }
+        // Button Actions (export/import/filter) - inchangés
+        document.querySelectorAll('.btn-export, .btn-import, .btn-filter').forEach(btn => {
+            if (!btn) return;
         });
 
         // Table Action Buttons
@@ -505,8 +530,6 @@
             const rowData = table.row(row).data();
             alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
         });
-
-
 
         $('#agenciesTable').on('click', '.btn-delete', function() {
             const btn = this;
@@ -523,4 +546,6 @@
         });
     });
 </script>
+
+            
 @endsection
