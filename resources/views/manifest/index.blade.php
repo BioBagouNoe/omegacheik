@@ -730,6 +730,7 @@
                         row.removeClass('editing');
                     });
 
+                    
                     // Sauvegarder édition AJAX
                     $('#agenciesTable').on('click', '.btn-save-edit', function() {
                         const row = $(this).closest('tr');
