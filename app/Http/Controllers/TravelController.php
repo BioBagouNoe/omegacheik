@@ -12,7 +12,8 @@ class TravelController extends Controller
      */
     public function index()
     {
-        //
+        $travels = \App\Models\Travel::with('travelDetails')->get();
+        return response()->json($travels);
     }
 
     /**
@@ -20,7 +21,9 @@ class TravelController extends Controller
      */
     public function create()
     {
-        //
+        // Si vous avez une vue pour créer un travel, retournez-la ici
+        // return view('travel.create');
+        return response()->json(['message' => 'Show create travel form']);
     }
 
     /**
@@ -28,7 +31,15 @@ class TravelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'num_travel' => 'required|string',
+            'arrival_date' => 'required|date',
+            'docking_date' => 'required|date',
+            'end_unloading' => 'required|date',
+            'status' => 'required|in:scheduled,in_progress,completed,canceled',
+        ]);
+        $travel = \App\Models\Travel::registerTravel($validated);
+        return response()->json($travel, 201);
     }
 
     /**
@@ -36,7 +47,8 @@ class TravelController extends Controller
      */
     public function show(Travel $travel)
     {
-        //
+        $travel->load('travelDetails');
+        return response()->json($travel);
     }
 
     /**
@@ -44,7 +56,9 @@ class TravelController extends Controller
      */
     public function edit(Travel $travel)
     {
-        //
+        // Si vous avez une vue pour éditer un travel, retournez-la ici
+        // return view('travel.edit', compact('travel'));
+        return response()->json(['message' => 'Show edit travel form', 'travel' => $travel]);
     }
 
     /**
@@ -52,7 +66,15 @@ class TravelController extends Controller
      */
     public function update(Request $request, Travel $travel)
     {
-        //
+        $validated = $request->validate([
+            'num_travel' => 'sometimes|required|string',
+            'arrival_date' => 'sometimes|required|date',
+            'docking_date' => 'sometimes|required|date',
+            'end_unloading' => 'sometimes|required|date',
+            'status' => 'sometimes|required|in:scheduled,in_progress,completed,canceled',
+        ]);
+        $travel->updateTravel($validated);
+        return response()->json($travel);
     }
 
     /**
@@ -60,6 +82,7 @@ class TravelController extends Controller
      */
     public function destroy(Travel $travel)
     {
-        //
+        $travel->deleteTravel();
+        return response()->json(['message' => 'Travel deleted successfully']);
     }
 }

@@ -107,15 +107,123 @@
                 </div>
 
                 <!-- DataTable -->
-                @include('components.table_manifest')
+              <!-- DataTable -->
+<div class="datatable-card">
+    <div class="datatable-header">
+        <h3 class="datatable-title">Manifestes</h3>
+        <div class="datatable-actions">
+            <button class="action-btn btn-add" id="addManifestBtn">
+                <i class="fas fa-plus"></i>
+                Ajouter
+            </button>
+            <button class="action-btn btn-import">
+                <i class="fas fa-upload"></i>
+                Importer
+            </button>
+            <button class="action-btn btn-export">
+                <i class="fas fa-download"></i>
+                Exporter
+            </button>
+            <button class="action-btn btn-filter">
+                <i class="fas fa-filter"></i>
+                Filtrer
+            </button>
+        </div>
+    </div>
+
+    <table id="manifestsTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Navire</th>
+                <th>Date d'arrivée</th>
+                <th>Date d'amarrage</th>
+                <th>Fin de déchargement</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="manifestsTableBody">
+            <!-- Les lignes seront ajoutées dynamiquement ici -->
+        </tbody>
+    </table>
+</div>
 
 
             </section>
         </main>
     </div>
 
-    <!-- Modal d'ajout de manifeste -->
-    @include('components.manifest-modal')
+    <!-- Modal d'ajout de travel -->
+    <div class="modal" id="addManifestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajouter un manifeste</h3>
+                <button class="modal-close" id="closeModalBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="manifestForm">
+                    <!-- Numéro de voyage et Navire -->
+                    <div class="form-row d-flex gap-3 mb-3">
+                         <div class="form-group flex-fill">
+                            <label class="form-label" for="id_nav">Navire</label>
+                            <select class="form-control" id="id_nav" required>
+                                <option value="">Sélectionner un navire</option>
+                                <!-- Options dynamiques -->
+                            </select>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="num_travel">Numéro de voyage</label>
+                            <input type="text" class="form-control" id="num_travel" required>
+                        </div>
+                    </div>
+
+                    <!-- Agence et Statut -->
+                    <div class="form-row d-flex gap-3 mb-3">
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="id_agency">Agence</label>
+                            <select class="form-control" id="id_agency" required>
+                                <option value="">Sélectionner une agence</option>
+                                <!-- Options dynamiques -->
+                            </select>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="status">Statut</label>
+                            <select class="form-control" id="status" required>
+                                <option value="">Sélectionner</option>
+                                <option value="1">Actif</option>
+                                <option value="0">Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date d’arrivée, Date d’amarrage, Date de fin de déchargement -->
+                    <div class="form-row d-flex gap-3 mb-3">
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="arrival_date">Date d’arrivée</label>
+                            <input type="date" class="form-control" id="arrival_date" required>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="docking_date">Date d’amarrage</label>
+                            <input type="date" class="form-control" id="docking_date" required>
+                        </div>
+                        <div class="form-group flex-fill">
+                            <label class="form-label" for="end_unloading">Date de fin de déchargement</label>
+                            <input type="date" class="form-control" id="end_unloading">
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Annuler</button>
+                <button class="btn btn-primary" id="saveBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Mobile Menu Toggle
@@ -153,21 +261,139 @@
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
 
+        // Fonction pour afficher les travels dans le tableau
+        function renderTravels(travels) {
+            const tbody = document.getElementById('manifestsTableBody');
+            tbody.innerHTML = '';
+            travels.forEach(travel => {
+                let statusLabel = '';
+                switch(travel.status) {
+                    case 'scheduled': statusLabel = '<span class="status-badge status-available">Prévu</span>'; break;
+                    case 'in_progress': statusLabel = '<span class="status-badge status-maintenance">En cours</span>'; break;
+                    case 'completed': statusLabel = '<span class="status-badge status-reserved">Terminé</span>'; break;
+                    case 'canceled': statusLabel = '<span class="status-badge status-out-of-service">Annulé</span>'; break;
+                    default: statusLabel = travel.status;
+                }
+                tbody.innerHTML += `
+                <tr data-id="${travel.id}">
+                    <td>${travel.num_travel}</td>
+                    <td>${travel.id_nav || ''}</td>
+                    <td>${travel.arrival_date}</td>
+                    <td>${travel.docking_date}</td>
+                    <td>${travel.end_unloading}</td>
+                    <td>${statusLabel}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-view" title="Voir"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn btn-update" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn btn-delete" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // Charger les travels au chargement de la page
+        function fetchTravels() {
+            fetch('/travels')
+                .then(res => res.json())
+                .then(data => renderTravels(data));
+        }
+        fetchTravels();
+
+        // Ajout d'un travel via le modal
         saveBtn.addEventListener('click', function() {
-            // Ici, vous ajouteriez la logique pour sauvegarder le manifeste
             const form = document.getElementById('manifestForm');
             if (form.checkValidity()) {
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
                 saveBtn.disabled = true;
-                
-                setTimeout(() => {
+                const travelData = {
+                    num_travel: document.getElementById('num_travel').value,
+                    arrival_date: document.getElementById('arrival_date').value,
+                    docking_date: document.getElementById('docking_date').value,
+                    end_unloading: document.getElementById('end_unloading').value,
+                    status: document.getElementById('status').value
+                };
+                fetch('/travels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(travelData)
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Erreur lors de l\'ajout');
+                    return res.json();
+                })
+                .then(data => {
+                    fetchTravels();
+                    closeModal();
+                })
+                .catch(() => alert('Erreur lors de l\'ajout'))
+                .finally(() => {
                     saveBtn.innerHTML = 'Enregistrer';
                     saveBtn.disabled = false;
-                    alert('Véhicule ajouté avec succès !');
-                    closeModal();
-                }, 1500);
+                });
             } else {
                 alert('Veuillez remplir tous les champs obligatoires.');
+            }
+        });
+
+        // Actions Voir, Modifier, Supprimer
+        document.getElementById('manifestsTableBody').addEventListener('click', function(e) {
+            const tr = e.target.closest('tr');
+            const id = tr?.getAttribute('data-id');
+            if (!id) return;
+
+            // Voir
+            if (e.target.closest('.btn-view')) {
+                fetch(`/travels/${id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        alert(`Détails du manifeste :\nNuméro : ${data.num_travel}\nArrivée : ${data.arrival_date}\nStatut : ${data.status}`);
+                    });
+            }
+
+            // Modifier
+            if (e.target.closest('.btn-update')) {
+                // Pour la démo, on demande un nouveau statut
+                const newStatus = prompt('Nouveau statut (scheduled, in_progress, completed, canceled) :');
+                if (!newStatus) return;
+                fetch(`/travels/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Erreur lors de la modification');
+                    return res.json();
+                })
+                .then(() => fetchTravels())
+                .catch(() => alert('Erreur lors de la modification'));
+            }
+
+            // Supprimer
+            if (e.target.closest('.btn-delete')) {
+                if (!confirm('Voulez-vous vraiment supprimer ce manifeste ?')) return;
+                fetch(`/travels/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Erreur lors de la suppression');
+                    return res.json();
+                })
+                .then(() => fetchTravels())
+                .catch(() => alert('Erreur lors de la suppression'));
             }
         });
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AgencyController;
 use App\Http\Controllers\LineController;
 use App\Http\Controllers\ShipController;
+use App\Http\Controllers\TravelController;
 
 // ====================
 // Routes publiques (accessibles sans être connecté)
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Manifestes
+    Route::resource('travels', TravelController::class);
     Route::view('/manifests', 'manifest.index')->name('manifests');
     Route::view('/manifest-details', 'manifest_detail.index')->name('manifest-details');
 
