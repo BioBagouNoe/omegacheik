@@ -84,18 +84,57 @@ class AgencyController extends Controller
      */
     public function update(Request $request, Agency $agency)
     {
-        $validated = $request->validate([
-            'name_agency' => 'required|string|max:255',
-            'adress_agency' => 'required|string|max:255',
-            'line_id' => 'required|exists:lines,id',
-            'pays_id' => 'nullable|exists:pays,id',
-        ]);
-        $agency->update($validated);
-        if ($request->expectsJson() || $request->ajax()) {
-            $agency->load('line', 'pays');
-            return response()->json(['success' => true, 'agency' => $agency], 200);
+        try {
+            $validated = $request->validate([
+                'name_agency' => 'required|string|max:255',
+                'adress_agency' => 'required|string|max:255',
+                'line_id' => 'required|exists:lines,id',
+                'pays_id' => 'required|exists:pays,id',
+                '_method' => 'sometimes|in:PUT,PATCH,DELETE',
+            ]);
+            
+            // Si c'est une requête DELETE
+            if ($request->has('_method') && $request->input('_method') === 'DELETE') {
+                $agency->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Agence supprimée avec succès'
+                ], 200);
+            }
+            
+            // Mise à jour de l'agence
+            $agency->update([
+                'name_agency' => $validated['name_agency'],
+                'adress_agency' => $validated['adress_agency'],
+                'line_id' => $validated['line_id'],
+                'pays_id' => $validated['pays_id'],
+            ]);
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                $agency->load('line', 'pays');
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Agence mise à jour avec succès',
+                    'agency' => $agency,
+                    'line_name' => $agency->line->name_line ?? '',
+                    'pays_name' => $agency->pays->nom ?? ''
+                ], 200);
+            }
+            
+            return redirect()->route('agencies.index')
+                ->with('success', 'Agence modifiée avec succès');
+                
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors() ?? null
+                ], 422);
+            }
+            
+            return back()->withErrors($e->errors() ?? $e->getMessage());
         }
-        return redirect()->route('agencies.index')->with('success', 'Agence modifiée avec succès');
     }
 
     /**

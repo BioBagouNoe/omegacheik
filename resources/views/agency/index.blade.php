@@ -3,6 +3,30 @@
 @section('title', 'Agence - Gestion de Parc Automobile')
 
 @section('content')
+<style>
+    /* Style pour les notifications */
+    .alert-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        z-index: 1100;
+        opacity: 0.95;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+
+    /* Animation de clignotement */
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .alert-blink {
+        animation: blink 1s infinite;
+    }
+</style>
 <div class="dashboard">
     <!-- Sidebar -->
     @include('partials.sidebar')
@@ -96,7 +120,7 @@
                                     <form action="{{ route('agencies.destroy', $agency) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="action-btn btn-delete" title="Supprimer" onclick="return confirm('Voulez-vous vraiment supprimer cette agence ?')">
+                                        <button type="button" class="action-btn btn-delete" title="Supprimer" data-agency-id="{{ $agency->id }}" data-agency-name="{{ $agency->name_agency }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -179,9 +203,64 @@
                                     tr.querySelector('.agency-adress-input').style.display = 'inline-block';
                                     editBtn.style.display = 'none';
                                     tr.querySelector('.btn-validate').style.display = 'inline-block';
+                                    tr.querySelector('.btn-cancel').style.display = 'inline-block';
                                 });
                             });
 
+                            // Gestion de l'annulation de la modification
+                            document.querySelectorAll('.btn-cancel').forEach(function(cancelBtn) {
+                                cancelBtn.addEventListener('click', function() {
+                                    const tr = cancelBtn.closest('tr');
+                                    
+                                    // Récupérer les valeurs d'origine
+                                    const nameText = tr.querySelector('.agency-name-text').textContent;
+                                    const lineText = tr.querySelector('.agency-line-text').textContent;
+                                    const paysText = tr.querySelector('.agency-pays-text').textContent;
+                                    const adressText = tr.querySelector('.agency-adress-text').textContent;
+                                    
+                                    // Réinitialiser les champs de formulaire
+                                    const nameInput = tr.querySelector('.agency-name-input');
+                                    const lineSelect = tr.querySelector('.agency-line-select');
+                                    const paysSelect = tr.querySelector('.agency-pays-select');
+                                    const adressInput = tr.querySelector('.agency-adress-input');
+                                    
+                                    if (nameInput) nameInput.value = nameText;
+                                    if (lineSelect) {
+                                        // Trouver l'option correspondant au texte affiché
+                                        for (let i = 0; i < lineSelect.options.length; i++) {
+                                            if (lineSelect.options[i].text === lineText) {
+                                                lineSelect.selectedIndex = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (paysSelect) {
+                                        // Trouver l'option correspondant au texte affiché
+                                        for (let i = 0; i < paysSelect.options.length; i++) {
+                                            if (paysSelect.options[i].text === paysText) {
+                                                paysSelect.selectedIndex = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (adressInput) adressInput.value = adressText;
+                                    
+                                    // Revenir à l'affichage normal
+                                    tr.querySelectorAll('.agency-name-text, .agency-line-text, .agency-pays-text, .agency-adress-text')
+                                        .forEach(el => el.style.display = '');
+                                    tr.querySelectorAll('.agency-name-input, .agency-line-select, .agency-pays-select, .agency-adress-input')
+                                        .forEach(el => el.style.display = 'none');
+                                    
+                                    // Cacher les boutons de validation/annulation et afficher le bouton de modification
+                                    tr.querySelectorAll('.btn-validate, .btn-cancel').forEach(btn => btn.style.display = 'none');
+                                    tr.querySelector('.btn-update').style.display = '';
+                                    
+                                    // Afficher un message d'information
+                                    showNotification('Modification annulée', 'info');
+                                });
+                            });
+
+                            // Gestion de la validation de la modification
                             document.querySelectorAll('.btn-validate').forEach(function(validateBtn) {
                                 validateBtn.addEventListener('click', function() {
                                     const tr = validateBtn.closest('tr');
@@ -189,58 +268,92 @@
                                     const nameInput = tr.querySelector('.agency-name-input');
                                     const lineSelect = tr.querySelector('.agency-line-select');
                                     const paysSelect = tr.querySelector('.agency-pays-select');
-                                    const newName = nameInput.value;
-                                    const newLineId = lineSelect.value;
-                                    const newPaysId = paysSelect.value;
-                                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
-                                    let adressInput = tr.querySelector('.agency-adress-input');
-                                    let newAdress = adressInput ? adressInput.value : '';
+                                    const adressInput = tr.querySelector('.agency-adress-input');
 
-                                    fetch(`/agencies/${agencyId}`, {
-                                            method: 'PUT',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': token,
-                                                'Accept': 'application/json',
-                                            },
-                                            body: JSON.stringify({
-                                                name_agency: newName,
-                                                line_id: newLineId,
-                                                pays_id: newPaysId !== '' ? newPaysId : null,
-                                                adress_agency: newAdress
-                                            })
-                                        })
-                                        .then(response => {
-                                            if (!response.ok) throw new Error('Erreur lors de la mise à jour');
-                                            return response.json();
-                                        })
-                                        .then(data => {
-                                            tr.querySelector('.agency-name-text').textContent = newName;
-                                            tr.querySelector('.agency-name-text').style.display = 'inline';
-                                            nameInput.style.display = 'none';
-                                            tr.querySelector('.agency-line-text').textContent = lineSelect.options[lineSelect.selectedIndex].text;
-                                            tr.querySelector('.agency-line-text').style.display = 'inline';
-                                            lineSelect.style.display = 'none';
-                                            tr.querySelector('.agency-pays-text').textContent = paysSelect.options[paysSelect.selectedIndex].text;
-                                            tr.querySelector('.agency-pays-text').style.display = 'inline';
-                                            paysSelect.style.display = 'none';
-                                            if (adressInput) {
-                                                tr.querySelector('.agency-adress-text').textContent = newAdress;
-                                                tr.querySelector('.agency-adress-text').style.display = 'inline';
-                                                adressInput.style.display = 'none';
+                                    const name = nameInput ? nameInput.value.trim() : '';
+                                    const lineId = lineSelect ? lineSelect.value : '';
+                                    const paysId = paysSelect ? paysSelect.value : '';
+                                    const adress = adressInput ? adressInput.value.trim() : '';
+
+                                    // Vérifier que les champs obligatoires sont remplis
+                                    if (!name) {
+                                        showNotification('Le nom de l\'agence est obligatoire', 'danger');
+                                        return;
+                                    }
+
+                                    // Désactiver le bouton pendant la requête
+                                    const originalHtml = validateBtn.innerHTML;
+                                    validateBtn.disabled = true;
+                                    validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                                    // Envoyer les données au format FormData pour une meilleure compatibilité
+                                    const formData = new FormData();
+                                    formData.append('_method', 'PUT');
+                                    formData.append('name_agency', name);
+                                    formData.append('line_id', lineId);
+                                    formData.append('pays_id', paysId);
+                                    formData.append('adress_agency', adress);
+
+                                    // Utiliser jQuery.ajax pour une meilleure gestion des erreurs
+                                    $.ajax({
+                                        url: `/agencies/${agencyId}`,
+                                        type: 'POST',
+                                        data: formData,
+                                        processData: false,
+                                        contentType: false,
+                                        headers: {
+                                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        },
+                                        success: function(response) {
+                                            if (response && response.success) {
+                                                // Mettre à jour les champs texte
+                                                const nameText = tr.querySelector('.agency-name-text');
+                                                const lineText = tr.querySelector('.agency-line-text');
+                                                const paysText = tr.querySelector('.agency-pays-text');
+                                                const adressText = tr.querySelector('.agency-adress-text');
+
+                                                if (nameText) nameText.textContent = name;
+                                                if (lineText) lineText.textContent = lineSelect ? lineSelect.options[lineSelect.selectedIndex].text : '';
+                                                if (paysText) paysText.textContent = paysSelect ? paysSelect.options[paysSelect.selectedIndex].text : '';
+                                                if (adressText) adressText.textContent = adress;
+
+                                                // Afficher les champs texte et cacher les champs de formulaire
+                                                tr.querySelectorAll('.agency-name-text, .agency-line-text, .agency-pays-text, .agency-adress-text')
+                                                    .forEach(el => el.style.display = '');
+                                                tr.querySelectorAll('.agency-name-input, .agency-line-select, .agency-pays-select, .agency-adress-input')
+                                                    .forEach(el => el.style.display = 'none');
+
+                                                // Mettre à jour les data-attributes si nécessaire
+                                                tr.setAttribute('data-line-id', lineId);
+                                                tr.setAttribute('data-pays-id', paysId);
+
+                                                // Cacher les boutons de validation/annulation et afficher le bouton de modification
+                                                tr.querySelectorAll('.btn-validate, .btn-cancel').forEach(btn => btn.style.display = 'none');
+                                                tr.querySelector('.btn-update').style.display = '';
+
+                                                // Afficher un message de succès
+                                                showNotification('Agence mise à jour avec succès', 'success');
+                                            } else {
+                                                throw new Error('Réponse invalide du serveur');
                                             }
-                                            validateBtn.style.display = 'none';
-                                            tr.querySelector('.btn-update').style.display = 'inline-block';
-                                            // Affiche une notification verte en haut
-                                            const msg = document.getElementById('agency-success-msg');
-                                            msg.style.display = 'block';
-                                            setTimeout(() => {
-                                                msg.style.display = 'none';
-                                            }, 5000);
-                                        })
-                                        .catch(error => {
-                                            // Ne rien afficher, ni alert, ni message
-                                        });
+                                        },
+                                        error: function(xhr) {
+                                            let errorMessage = 'Une erreur est survenue lors de la mise à jour';
+                                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                                errorMessage = xhr.responseJSON.message;
+                                            } else if (xhr.statusText) {
+                                                errorMessage += `: ${xhr.statusText}`;
+                                            }
+                                            showNotification(errorMessage, 'danger');
+                                            console.error('Erreur:', xhr);
+                                        },
+                                        complete: function() {
+                                            // Réactiver le bouton
+                                            validateBtn.disabled = false;
+                                            validateBtn.innerHTML = originalHtml;
+                                        }
+                                    });
                                 });
                             });
                         });
@@ -309,6 +422,42 @@
 </div>
 
 <script>
+    // Fonction utilitaire pour afficher les notifications
+    function showNotification(message, type = 'success') {
+        // Supprimer les notifications existantes
+        document.querySelectorAll('.alert-notification').forEach(el => el.remove());
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-notification alert-blink`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        // Ajouter la notification au corps du document
+        document.body.appendChild(alertDiv);
+
+        // Forcer le reflow pour que l'animation fonctionne
+        alertDiv.offsetHeight;
+
+        // Désactiver le clignotement après 3 secondes
+        setTimeout(() => {
+            alertDiv.classList.remove('alert-blink');
+        }, 3000);
+
+        // Supprimer la notification après 5 secondes
+        setTimeout(() => {
+            alertDiv.classList.add('fade');
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 150);
+        }, 5000);
+    }
+
     // Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const sidebar = document.getElementById('sidebar');
@@ -411,26 +560,10 @@
                         return data;
                     })
                     .then(data => {
-                        // Notification visuelle
-                        const msg = document.createElement('div');
-                        msg.textContent = 'Agence ajoutée avec succès !';
-                        msg.style.display = 'block';
-                        msg.style.position = 'fixed';
-                        msg.style.top = '20px';
-                        msg.style.left = '50%';
-                        msg.style.transform = 'translateX(-50%)';
-                        msg.style.background = '#22c55e';
-                        msg.style.color = '#fff';
-                        msg.style.padding = '10px 30px';
-                        msg.style.borderRadius = '6px';
-                        msg.style.zIndex = '9999';
-                        msg.style.fontWeight = 'bold';
-                        msg.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                        document.body.appendChild(msg);
-                        setTimeout(() => {
-                            msg.remove();
-                        }, 3000);
-
+                        // Afficher la notification de succès
+                        showNotification('Agence ajoutée avec succès !', 'success');
+                        
+                        // Fermer le modal
                         closeModal();
 
                         // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
@@ -488,10 +621,14 @@
                         }
                     })
                     .catch(error => {
-                        // Restaurer le bouton et ne pas afficher d'alert intrusive
+                        // Afficher la notification d'erreur
+                        showNotification('Une erreur est survenue lors de l\'ajout de l\'agence', 'danger');
+                        
+                        // Restaurer le bouton
                         saveBtn.innerHTML = 'Enregistrer';
                         saveBtn.disabled = false;
-                        // Optionnel: log dans la console pour debug
+                        
+                        // Log dans la console pour debug
                         console.error(error);
                     });
             } else {
@@ -500,7 +637,75 @@
         });
     }
 
-    // Initialize DataTable (laissez comme avant)
+    // Gestion de la suppression avec confirmation et feedback visuel
+    $(document).on('click', '.btn-delete', function() {
+        const button = $(this);
+        const agencyId = button.data('agency-id');
+        const agencyName = button.data('agency-name');
+        const row = button.closest('tr');
+        
+        // Afficher une confirmation avant de supprimer
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer l'agence "${agencyName}" ?`)) {
+            return;
+        }
+        
+        // Désactiver le bouton pour éviter les clics multiples
+        const originalHtml = button.html();
+        button.html('<i class="fas fa-spinner fa-spin"></i>');
+        button.prop('disabled', true);
+        
+        // Créer un objet FormData pour l'envoi
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('_method', 'DELETE');
+        
+        // Envoyer la requête de suppression
+        $.ajax({
+            url: `/agencies/${agencyId}`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    // Supprimer la ligne du tableau avec une animation
+                    row.fadeOut(400, function() {
+                        row.remove();
+                        // Si le tableau est vide, afficher un message
+                        if ($('#agenciesTable tbody tr').length === 0) {
+                            $('#agenciesTable tbody').html('<tr><td colspan="5" class="text-center">Aucune agence trouvée.</td></tr>');
+                        }
+                        // Afficher la notification de succès après l'animation
+                        showNotification('L\'agence a été supprimée avec succès', 'success');
+                    });
+                } else {
+                    throw new Error('Réponse invalide du serveur');
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Une erreur est survenue lors de la suppression de l\'agence';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.statusText) {
+                    errorMessage += `: ${xhr.statusText}`;
+                }
+                
+                // Afficher la notification d'erreur
+                showNotification(errorMessage, 'danger');
+                console.error('Erreur lors de la suppression :', xhr);
+                
+                // Réactiver le bouton en cas d'erreur
+                button.html(originalHtml);
+                button.prop('disabled', false);
+            }
+        });
+    });
+
+    // Initialize DataTable
     $(document).ready(function() {
         const table = $('#agenciesTable').DataTable({
             "language": {
@@ -529,20 +734,6 @@
             const row = $(this).closest('tr');
             const rowData = table.row(row).data();
             alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
-        });
-
-        $('#agenciesTable').on('click', '.btn-delete', function() {
-            const btn = this;
-            const row = $(this).closest('tr');
-            const rowData = table.row(row).data();
-            if (confirm(`Voulez-vous vraiment supprimer ${rowData[0]} (${rowData[1]}) ?`)) {
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    table.row(row).remove().draw();
-                    alert(`Suppression effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            }
         });
     });
 </script>
