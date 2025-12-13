@@ -140,9 +140,30 @@ class AgencyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Agency $agency)
+    public function destroy(Request $request, Agency $agency)
     {
-        $agency->delete();
-        return redirect()->route('agencies.index')->with('success', 'Agence supprimée avec succès');
+        try {
+            $agency->delete();
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Agence supprimée avec succès'
+                ]);
+            }
+            
+            return redirect()->route('agencies.index')
+                ->with('success', 'Agence supprimée avec succès');
+                
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la suppression : ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+        }
     }
 }
