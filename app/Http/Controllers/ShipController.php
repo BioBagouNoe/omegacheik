@@ -34,6 +34,7 @@ class ShipController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
         $request->validate([
             'name_nav' => 'required',
             'line_id' => 'required|exists:lines,id',

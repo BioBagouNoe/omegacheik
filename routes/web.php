@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AgencyController;
 use App\Http\Controllers\LineController;
+use App\Http\Controllers\ShipController;
 
 // ====================
 // Routes publiques (accessibles sans être connecté)
@@ -53,7 +54,9 @@ Route::middleware('auth')->group(function () {
     Route::view('/manifest-details', 'manifest_detail.index')->name('manifest-details');
 
     // Navires
-    Route::view('/ships', 'ship.index')->name('ships');
+Route::resource('ships', ShipController::class);
+Route::post('ships/import', [ShipController::class,'import'])->name('ships.import');
+Route::get('ships/export', [ShipController::class,'export'])->name('ships.export');
 
     // Profil utilisateur
     Route::view('/profile', 'user.profile')->name('profile');

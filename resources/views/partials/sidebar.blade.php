@@ -27,7 +27,7 @@
                   <i class="fas fa-building"></i>
                   Agence
               </a>
-              <a href="{{ route('ships') }}" class="nav-item">
+              <a href="{{ route('ships.index') }}" class="nav-item">
                   <i class="fas fa-ship"></i>
                   Navire
               </a>
