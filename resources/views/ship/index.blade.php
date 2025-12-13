@@ -107,14 +107,13 @@
             </button>
         </div>
         <div class="modal-body">
-            <form id="navireForm" action="{{ route('ships.store') }}" method="POST">
+            <form id="navireForm" action="{{ route('ships.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <!-- Nom du navire et Ligne -->
                 <div class="form-row d-flex gap-3 mb-3">
-
                     <div class="form-group flex-fill">
                         <label class="form-label" for="name_nav">Nom du navire</label>
-                        <input type="text" class="form-control" id="name_nav" required>
+                        <input type="text" class="form-control" id="name_nav" name="name_nav" required>
                     </div>
 
                     <div class="form-group flex-fill">
@@ -211,20 +210,22 @@
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
                 saveBtn.disabled = true;
 
+                // Créer un objet FormData à partir du formulaire
                 const formData = new FormData(form);
-                // token CSRF
-                const token = form.querySelector('input[name="_token"]')?.value || document.querySelector(
-                    'meta[name="csrf-token"]')?.getAttribute('content');
-
-                // IMPORTANT: ne pas définir Content-Type si on envoie FormData
+                
+                // Récupérer le token CSRF
+                const token = document.querySelector('meta[name="csrf-token"]')?.content;
+                
+                // Envoyer la requête
                 fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': token,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    })
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
                     .then(async response => {
                         // si erreur 422 ou autre on récupère le JSON (si fourni)
                         const text = await response.text();
@@ -279,51 +280,67 @@
                             emptyRow.parentElement.remove();
                         }
 
-                        // Ajout dynamique dans le tableau sans reload (si le controller renvoie data.navire)
-                        if (data && data.navire && table) {
-                            const newRow = document.createElement('tr');
-                            newRow.setAttribute('data-navire-id', data.navire.id);
-                            newRow.innerHTML = `
-          <td>${data.navire.id}</td>
-          <td>
-              <span class='navire-name-text'>${data.navire.name_nav}</span>
-              <input type='text' class='form-control navire-name-input' value='${data.navire.name_nav}' style='display:none; width: 80%;' />
-          </td>
-          <td>
-              <span class='navire-line-text'></span>
-              <select class='form-control navire-line-select' style='display:none; width: 80%;'>
-                  ${document.getElementById('line_id') ? document.getElementById('line_id').innerHTML : ''}
-              </select>
-          </td>
-          <td>
-              <span class='navire-pays-text'></span>
-          </td>
-          <td>
-              <span class='navire-adress-text'>${data.navire.adress_navire || ''}</span>
-              <input type='text' class='form-control navire-adress-input' value='${data.navire.adress_navire || ''}' style='display:none; width: 80%;' />
-          </td>
-          <td>
-              <div class='action-buttons d-flex justify-content-end gap-2'>
-                  <a href='/agencies/${data.navire.id}' class='action-btn btn-view' style='text-decoration: none;' title='Voir'>
-                      <i class='fas fa-eye'></i>
-                  </a>
-                  <button class='action-btn btn-update' title='Modifier' type='button'>
-                      <i class='fas fa-edit'></i>
-                  </button>
-                  <button class='action-btn btn-validate' title='Valider' style='display:none;'>
-                      <i class='fas fa-check'></i>
-                  </button>
-                  <form action='/agencies/${data.navire.id}' method='POST' style='display:inline;'>
-                      <input type='hidden' name='_token' value='${form.querySelector('input[name="_token"]').value}'>
-                      <input type='hidden' name='_method' value='DELETE'>
-                      <button type='submit' class='action-btn btn-delete' title='Supprimer' onclick='return confirm("Voulez-vous vraiment supprimer cette agence ?")'>
-                          <i class='fas fa-trash'></i>
-                      </button>
-                  </form>
-              </div>
-          </td>
-      `;
-                            table.appendChild(newRow);
+                        // Ajout dynamique dans le tableau avec DataTables
+                        if (data.success && data.navire) {
+                            const table = $('#naviresTable').DataTable();
+                            
+                            // Créer la nouvelle ligne avec la structure attendue
+                            const newRow = [
+                                // Nom du navire
+                                `
+                                <span class="ship-name-text">${data.navire.name_nav}</span>
+                                <input type="text" class="form-control ship-name-input d-none" value="${data.navire.name_nav}" />
+                                `,
+                                // Ligne
+                                `
+                                <span class="ship-line-text">${data.line ? data.line.name_line : ''}</span>
+                                <select class="form-control ship-line-select d-none">
+                                    ${$('#line_id').find('option').map((i, el) => 
+                                        `<option value="${el.value}" ${el.value == data.navire.line_id ? 'selected' : ''}>${el.text}</option>`
+                                    ).get().join('')}
+                                </select>
+                                `,
+                                // Actions
+                                `
+                                <div class="action-buttons d-flex justify-content-end gap-2">
+                                    <a href="#" class="action-btn btn-view" title="Voir" style="text-decoration: none;">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="action-btn btn-update" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn btn-save d-none" title="Enregistrer">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn btn-cancel d-none" title="Annuler">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="action-btn btn-delete" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                `
+                            ];
+
+                            // Ajouter la nouvelle ligne à DataTables
+                            const rowNode = table.row.add(newRow).draw(false).node();
+                            $(rowNode).attr('data-id', data.navire.id);
+                            
+                            // Supprimer le message 'Aucun navire trouvé' s'il existe
+                            const emptyRow = table.rows().nodes().to$().filter('td.dataTables_empty').parent();
+                            if (emptyRow.length) {
+                                emptyRow.remove();
+                            }
+                            
+                            // Afficher un message de succès
+                            const toast = document.createElement('div');
+                            toast.className = 'toast-message success';
+                            toast.textContent = data.message || 'Navire ajouté avec succès';
+                            document.body.appendChild(toast);
+                            setTimeout(() => toast.remove(), 3000);
+                            
+                            // Fermer le modal
+                            closeModal();
                         }
 
 
@@ -341,7 +358,7 @@
         });
     }
 
-    // Initialize DataTable (laissez comme avant)
+    // Initialize DataTable
     $(document).ready(function() {
         const table = $('#naviresTable').DataTable({
             "language": {
@@ -353,6 +370,16 @@
                 [0, "asc"]
             ],
             "dom": '<"datatable-controls"<"datatable-length"l><"datatable-filter"f>>t<"datatable-info"i><"datatable-paging"p>',
+            "columns": [
+                { "name": "name_nav", "orderable": true, "searchable": true },
+                { "name": "line", "orderable": true, "searchable": true },
+                { 
+                    "name": "actions", 
+                    "orderable": false, 
+                    "searchable": false,
+                    "className": "text-end"
+                }
+            ],
             "columnDefs": [{
                 targets: -1,
                 orderable: false,

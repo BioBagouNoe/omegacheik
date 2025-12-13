@@ -34,13 +34,22 @@ class ShipController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
         $request->validate([
             'name_nav' => 'required',
             'line_id' => 'required|exists:lines,id',
         ]);
-        Ship::create($request->only('name_nav', 'line_id'));
-        return redirect()->back()->with('success', 'Navire ajouté !');
+        
+        $ship = Ship::create($request->only('name_nav', 'line_id'));
+        
+        // Charger la relation line pour l'inclure dans la réponse
+        $ship->load('line');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Navire ajouté avec succès',
+            'navire' => $ship,
+            'line' => $ship->line  // Inclure les données de la ligne associée
+        ]);
     }
 
     /**
