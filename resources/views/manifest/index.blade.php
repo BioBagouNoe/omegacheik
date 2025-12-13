@@ -279,147 +279,7 @@
                                     tr.querySelector('.agency-adress-input').style.display = 'inline-block';
                                     editBtn.style.display = 'none';
                                     tr.querySelector('.btn-validate').style.display = 'inline-block';
-                                    tr.querySelector('.btn-cancel').style.display = 'inline-block';
-                                });
-                            });
 
-                            // Gestion de l'annulation de la modification
-                            document.querySelectorAll('.btn-cancel').forEach(function(cancelBtn) {
-                                cancelBtn.addEventListener('click', function() {
-                                    const tr = cancelBtn.closest('tr');
-
-                                    // Récupérer les valeurs d'origine
-                                    const nameText = tr.querySelector('.agency-name-text').textContent;
-                                    const lineText = tr.querySelector('.agency-line-text').textContent;
-                                    const paysText = tr.querySelector('.agency-pays-text').textContent;
-                                    const adressText = tr.querySelector('.agency-adress-text').textContent;
-
-                                    // Réinitialiser les champs de formulaire
-                                    const nameInput = tr.querySelector('.agency-name-input');
-                                    const lineSelect = tr.querySelector('.agency-line-select');
-                                    const paysSelect = tr.querySelector('.agency-pays-select');
-                                    const adressInput = tr.querySelector('.agency-adress-input');
-
-                                    if (nameInput) nameInput.value = nameText;
-                                    if (lineSelect) {
-                                        // Trouver l'option correspondant au texte affiché
-                                        for (let i = 0; i < lineSelect.options.length; i++) {
-                                            if (lineSelect.options[i].text === lineText) {
-                                                lineSelect.selectedIndex = i;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (paysSelect) {
-                                        // Trouver l'option correspondant au texte affiché
-                                        for (let i = 0; i < paysSelect.options.length; i++) {
-                                            if (paysSelect.options[i].text === paysText) {
-                                                paysSelect.selectedIndex = i;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (adressInput) adressInput.value = adressText;
-
-                                    // Revenir à l'affichage normal
-                                    tr.querySelectorAll('.agency-name-text, .agency-line-text, .agency-pays-text, .agency-adress-text')
-                                        .forEach(el => el.style.display = '');
-                                    tr.querySelectorAll('.agency-name-input, .agency-line-select, .agency-pays-select, .agency-adress-input')
-                                        .forEach(el => el.style.display = 'none');
-
-                                    // Cacher les boutons de validation/annulation et afficher le bouton de modification
-                                    tr.querySelectorAll('.btn-validate, .btn-cancel').forEach(btn => btn.style.display = 'none');
-                                    tr.querySelector('.btn-update').style.display = '';
-
-                                    // Afficher un message d'information
-                                    showNotification('Modification annulée', 'info');
-                                });
-                            });
-
-                            // Gestion de la validation de la modification
-                            document.querySelectorAll('.btn-validate').forEach(function(validateBtn) {
-                                validateBtn.addEventListener('click', function() {
-                                    const tr = validateBtn.closest('tr');
-                                    const agencyId = tr.getAttribute('data-agency-id');
-                                    const nameInput = tr.querySelector('.agency-name-input');
-                                    const lineSelect = tr.querySelector('.agency-line-select');
-                                    const paysSelect = tr.querySelector('.agency-pays-select');
-                                    const adressInput = tr.querySelector('.agency-adress-input');
-
-                                    const name = nameInput ? nameInput.value.trim() : '';
-                                    const lineId = lineSelect ? lineSelect.value : '';
-                                    const paysId = paysSelect ? paysSelect.value : '';
-                                    const adress = adressInput ? adressInput.value.trim() : '';
-
-                                    // Vérifier que les champs obligatoires sont remplis
-                                    if (!name) {
-                                        showNotification('Le nom de l\'agence est obligatoire ', 'danger');
-                                        return;
-                                    }
-
-                                    // Désactiver le bouton pendant la requête
-                                    const originalHtml = validateBtn.innerHTML;
-                                    validateBtn.disabled = true;
-                                    validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                                    // Envoyer les données au format FormData pour une meilleure compatibilité
-                                    const formData = new FormData();
-                                    formData.append('_method', 'PUT');
-                                    formData.append('name_agency', name);
-                                    formData.append('line_id', lineId);
-                                    formData.append('pays_id', paysId);
-                                    formData.append('adress_agency', adress);
-
-                                    // Utiliser jQuery.ajax pour une meilleure gestion des erreurs
-                                    $.ajax({
-                                        url: `/agencies/${agencyId}`,
-                                        type: 'POST',
-                                        data: formData,
-                                        processData: false,
-                                        contentType: false,
-                                        headers: {
-                                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                                            'X-Requested-With': 'XMLHttpRequest'
-                                        },
-                                        success: function(response) {
-                                            if (response && response.success) {
-                                                // Mettre à jour les champs texte
-                                                const nameText = tr.querySelector('.agency-name-text');
-                                                const lineText = tr.querySelector('.agency-line-text');
-                                                const paysText = tr.querySelector('.agency-pays-text');
-                                                const adressText = tr.querySelector('.agency-adress-text');
-
-                                                if (nameText) nameText.textContent = name;
-                                                if (lineText) lineText.textContent = lineSelect ? lineSelect.options[lineSelect.selectedIndex].text : '';
-                                                if (paysText) paysText.textContent = paysSelect ? paysSelect.options[paysSelect.selectedIndex].text : '';
-                                                if (adressText) adressText.textContent = adress;
-
-                                                // Afficher les champs texte et cacher les champs de formulaire
-                                                tr.querySelectorAll('.agency-name-text, .agency-line-text, .agency-pays-text, .agency-adress-text')
-                                                    .forEach(el => el.style.display = '');
-                                                tr.querySelectorAll('.agency-name-input, .agency-line-select, .agency-pays-select, .agency-adress-input')
-                                                    .forEach(el => el.style.display = 'none');
-
-                                                // Mettre à jour les data-attributes si nécessaire
-                                                tr.setAttribute('data-line-id', lineId);
-                                                tr.setAttribute('data-pays-id', paysId);
-
-                                                // Cacher les boutons de validation/annulation et afficher le bouton de modification
-                                                tr.querySelectorAll('.btn-validate, .btn-cancel').forEach(btn => btn.style.display = 'none');
-                                                tr.querySelector('.btn-update').style.display = '';
-
-                                                // Afficher un message de succès
-                                                showNotification('Agence mise à jour avec succès', 'success');
-                                            } else {
-                                                throw new Error('Réponse invalide du serveur');
-                                            }
-                                        },
-                                        error: function(xhr) {
-                                            let errorMessage = 'Une erreur est survenue lors de la mise à jour';
-                                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                                errorMessage = xhr.responseJSON.message;
-                                            } else if (xhr.statusText) {
-                                                errorMessage += `: ${xhr.statusText}`;
                                             }
                                             showNotification(errorMessage, 'danger');
                                             console.error('Erreur:', xhr);
@@ -874,7 +734,7 @@
                     $('#agenciesTable').on('click', '.btn-save-edit', function() {
                         const row = $(this).closest('tr');
                         const tds = row.find('td');
-                        const id = row.data('agency-id');
+                        const id = row.data('travel-id'); // Correction ici !
                         const shipId = tds.eq(0).find('select').val();
                         const shipName = shipsList.find(s => s.id == shipId)?.name || '';
                         const arrival = tds.eq(1).find('input').val();
