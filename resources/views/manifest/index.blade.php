@@ -148,7 +148,7 @@
                         <div id="agency-import-errors" style="display:none; margin-bottom:10px; color:#dc2626; font-weight:bold;"></div>
 
                         @forelse($travels as $travel)
-                        <tr data-agency-id="{{ $travel->id }}" data-ship-id="{{ $travel->ship_id }}">
+                        <tr data-travel-id="{{ $travel->id }}" data-ship-id="{{ $travel->ship_id }}">
                             <!-- Navire -->
                             <td class="ship-name-cell" data-ship-id="{{ $travel->ship_id }}">
                                 {{ $travel->ship->name_nav ?? '' }}
@@ -733,8 +733,8 @@
                     const button = $(this);
                     // Trouver la ligne et l'id du voyage
                     const row = button.closest('tr');
-                    // L'id est dans la première colonne
-                    const travelId = row.find('td').eq(0).text().trim();
+                    // L'id est dans l'attribut data-travel-id
+                    const travelId = row.attr('data-travel-id');
                     if (!travelId) return;
                     if (!confirm('Êtes-vous sûr de vouloir supprimer ce voyage ?')) return;
 

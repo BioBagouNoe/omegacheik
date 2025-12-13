@@ -134,7 +134,6 @@
                                         input.style.display = 'none';
                                         validateBtn.style.display = 'none';
                                         tr.querySelector('.btn-update').style.display = 'inline-block';
-                                        // Afficher une notification de succès
                                         if (typeof showNotification === 'function') {
                                             showNotification('Ligne mise à jour avec succès', 'success');
                                         }
@@ -145,6 +144,41 @@
                                             showNotification('Erreur lors de la mise à jour de la ligne', 'error');
                                         }
                                     });
+                            });
+                        });
+
+                        // Suppression AJAX des lignes
+                        $('#linesTable').on('submit', 'form[action*="lines/"]', function(e) {
+                            e.preventDefault();
+                            const form = this;
+                            const tr = form.closest('tr');
+                            const lineId = tr.getAttribute('data-line-id');
+                            if (!confirm('Voulez-vous vraiment supprimer cette ligne ?')) return;
+                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
+                            fetch(`/lines/${lineId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': token,
+                                    'Accept': 'application/json',
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error('Erreur lors de la suppression');
+                                return response.json().catch(() => ({}));
+                            })
+                            .then(data => {
+                                // Retirer la ligne du DataTable
+                                const table = $('#linesTable').DataTable();
+                                table.row($(tr)).remove().draw();
+                                if (typeof showNotification === 'function') {
+                                    showNotification('Ligne supprimée avec succès', 'success');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erreur:', error);
+                                if (typeof showNotification === 'function') {
+                                    showNotification('Erreur lors de la suppression de la ligne', 'error');
+                                }
                             });
                         });
                     });
