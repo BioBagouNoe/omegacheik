@@ -35,28 +35,6 @@
         border-radius: 0.25rem;
     }
 
-    /* Style pour les notifications */
-    .alert-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        min-width: 300px;
-        z-index: 1100;
-        opacity: 0.95;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transition: all 0.3s ease;
-    }
-
-    /* Animation de clignotement */
-    @keyframes blink {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
-
-    .alert-blink {
-        animation: blink 1s infinite;
-    }
 </style>
 <div class="dashboard">
     <!-- Sidebar -->
@@ -459,7 +437,7 @@
         document.querySelectorAll('.alert-notification').forEach(el => el.remove());
         
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-notification alert-blink`;
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-notification`;
         alertDiv.role = 'alert';
         alertDiv.innerHTML = `
             <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
@@ -686,7 +664,11 @@
                         console.error(error);
                     });
             } else {
-                alert('Veuillez remplir tous les champs obligatoires.');
+                if (typeof showNotification === 'function') {
+                    showNotification('Veuillez remplir tous les champs obligatoires.', 'warning');
+                } else {
+                    alert('Veuillez remplir tous les champs obligatoires.');
+                }
             }
         });
     }

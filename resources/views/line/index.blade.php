@@ -92,18 +92,8 @@
                 <div id="line-success-msg" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 30px;border-radius:6px;z-index:9999;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                     Modification effectuée avec succès !
                 </div>
-                @if(session('success'))
-                <div id="import-success-msg" style="display:block;position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 30px;border-radius:6px;z-index:9999;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    {{ session('success') }}
-                </div>
                 <script>
-                    setTimeout(function() {
-                        var msg = document.getElementById('import-success-msg');
-                        if (msg) msg.style.display = 'none';
-                    }, 5000);
-                </script>
-                @endif
-                <script>
+
                     document.addEventListener('DOMContentLoaded', function() {
                         document.querySelectorAll('.btn-update').forEach(function(editBtn) {
                             editBtn.addEventListener('click', function() {
@@ -144,30 +134,74 @@
                                         input.style.display = 'none';
                                         validateBtn.style.display = 'none';
                                         tr.querySelector('.btn-update').style.display = 'inline-block';
-                                        // Affiche une notification verte en haut
-                                        const msg = document.getElementById('line-success-msg');
-                                        msg.style.display = 'block';
-                                        setTimeout(() => {
-                                            msg.style.display = 'none';
-                                        }, 5000);
+                                        // Afficher une notification de succès
+                                        if (typeof showNotification === 'function') {
+                                            showNotification('Ligne mise à jour avec succès', 'success');
+                                        }
                                     })
                                     .catch(error => {
-                                        // Ne rien afficher, ni alert, ni message
+                                        console.error('Erreur:', error);
+                                        if (typeof showNotification === 'function') {
+                                            showNotification('Erreur lors de la mise à jour de la ligne', 'error');
+                                        }
                                     });
                             });
                         });
                     });
 
-                    // Gestion correcte de l'import : ouverture et soumission du formulaire
+                    // Gestion de l'import de fichiers
+                    const importForm = document.getElementById('importForm');
                     const importBtn = document.getElementById('importBtn');
                     const importInput = document.getElementById('importFileInput');
+                    
                     if (importBtn && importInput) {
+                        const importText = importBtn.querySelector('.import-text');
+                        const importLoading = importBtn.querySelector('.import-loading');
+                        
+                        // Gestion du clic sur le bouton d'import
                         importBtn.addEventListener('click', function(e) {
                             importInput.click();
                         });
-                        importInput.addEventListener('change', function() {
-                            if (importInput.files.length > 0) {
-                                document.getElementById('importForm').submit();
+                        
+                        // Gestion du changement de fichier
+                        importInput.addEventListener('change', function(e) {
+                            if (this.files.length > 0) {
+                                // Afficher le chargement
+                                if (importText) importText.style.display = 'none';
+                                if (importLoading) importLoading.style.display = 'inline-block';
+                                
+                                // Soumettre le formulaire
+                                const formData = new FormData(importForm);
+                                
+                                fetch(importForm.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        showNotification('Import réussi ! ' + (data.message || ''), 'success');
+                                        // Recharger la page pour afficher les nouvelles données
+                                        window.location.reload();
+                                    } else {
+                                        showNotification('Erreur lors de l\'import : ' + (data.message || 'Erreur inconnue'), 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Erreur:', error);
+                                    showNotification('Une erreur est survenue lors de l\'import', 'error');
+                                })
+                                .finally(() => {
+                                    // Réinitialiser le champ de fichier
+                                    importInput.value = '';
+                                    // Cacher le chargement et réafficher le texte
+                                    if (importText) importText.style.display = 'inline-block';
+                                    if (importLoading) importLoading.style.display = 'none';
+                                });
                             }
                         });
                     }

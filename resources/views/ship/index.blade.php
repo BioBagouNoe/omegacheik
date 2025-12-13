@@ -3,30 +3,6 @@
 @section('title', 'Navire - Gestion de Parc Automobile')
 
 @section('content')
-<style>
-    /* Style pour les notifications */
-    .alert-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        min-width: 300px;
-        z-index: 1100;
-        opacity: 0.95;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transition: all 0.3s ease;
-    }
-
-    /* Animation de clignotement */
-    @keyframes blink {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
-
-    .alert-blink {
-        animation: blink 1s infinite;
-    }
-</style>
 <div class="dashboard">
     <!-- Sidebar -->
     @include('partials.sidebar')
@@ -388,7 +364,11 @@
                         console.error(error);
                     });
             } else {
-                alert('Veuillez remplir tous les champs obligatoires.');
+                if (typeof showNotification === 'function') {
+                    showNotification('Veuillez remplir tous les champs obligatoires.', 'warning');
+                } else {
+                    alert('Veuillez remplir tous les champs obligatoires.');
+                }
             }
         });
     }

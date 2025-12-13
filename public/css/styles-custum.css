@@ -720,6 +720,46 @@ table.dataTable tbody tr:last-child td {
     color: #190464ff;
 }
 
+/* Styles pour les notifications */
+.alert-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    z-index: 1100;
+    opacity: 0.95;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    animation: blink 1s infinite;
+}
+
+.alert-notification.success {
+    background-color: #10b981;
+}
+
+.alert-notification.error {
+    background-color: #ef4444;
+}
+
+.alert-notification.warning {
+    background-color: #f59e0b;
+}
+
+/* Animation de clignotement */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.alert-blink {
+    animation: blink 1s infinite;
+}
+
 .dataTables_paginate .paginate_button.current {
     background: linear-gradient(135deg, #190464ff 0%, #2c0596ff 100%);
     border-color: #190464ff;
