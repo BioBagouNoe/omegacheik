@@ -4,6 +4,37 @@
 
 @section('content')
 <style>
+    /* Correction du style du tableau */
+    #agenciesTable {
+        table-layout: fixed;
+        width: 100% !important;
+    }
+
+    #agenciesTable thead th {
+        width: auto !important;
+    }
+
+    #agenciesTable tbody td {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Style pour les champs d'édition */
+    .agency-name-input,
+    .agency-line-select,
+    .agency-pays-select,
+    .agency-adress-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
     /* Style pour les notifications */
     .alert-notification {
         position: fixed;
@@ -560,65 +591,88 @@
                         return data;
                     })
                     .then(data => {
+                        // Fermer le modal et réinitialiser le formulaire
+                        closeModal();
+                        document.getElementById('agencyForm').reset();
+                        
+                        // Récupérer l'instance DataTable
+                        const table = $('#agenciesTable').DataTable();
+                        
+                        // Supprimer le message "Aucune agence" s'il existe
+                        if (table.data().count() === 1 && table.row(':eq(0)').data()[0] === 'Aucune agence trouvée') {
+                            table.clear().draw();
+                        }
+                        
+                        // Créer la nouvelle ligne avec le même format que le tableau existant
+                        const newRow = [
+                            data.agency.name_agency,
+                            data.agency.line ? data.agency.line.name_line : '',
+                            data.agency.pays ? data.agency.pays.nom : '',
+                            data.agency.adress_agency || '',
+                            `
+                            <div class="action-buttons d-flex justify-content-end gap-2">
+                                <a href="/agencies/${data.agency.id}" class="action-btn btn-view" style="text-decoration: none;" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="action-btn btn-update" data-agency-id="${data.agency.id}" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn btn-delete" 
+                                        data-agency-id="${data.agency.id}" 
+                                        data-agency-name="${data.agency.name_agency}"
+                                        title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            `
+                        ];
+                        
+                        // Ajouter la ligne et redessiner le tableau
+                        table.row.add(newRow).draw(false);
+                        
+                        // Réattacher les gestionnaires d'événements
+                        $(document).off('click', '.btn-update').on('click', '.btn-update', function() {
+                            const tr = $(this).closest('tr');
+                            tr.find('.agency-name-text').hide();
+                            tr.find('.agency-name-input').show();
+                            tr.find('.agency-line-text').hide();
+                            tr.find('.agency-line-select').show();
+                            tr.find('.agency-pays-text').hide();
+                            tr.find('.agency-pays-select').show();
+                            tr.find('.agency-adress-text').hide();
+                            tr.find('.agency-adress-input').show();
+                            tr.find('.btn-update').hide();
+                            tr.find('.btn-validate').show();
+                            tr.find('.btn-cancel').show();
+                        });
+                        
+                        // Gestionnaire pour la suppression
+                        $(document).off('click', '.btn-delete').on('click', '.btn-delete', function(e) {
+                            e.preventDefault();
+                            const button = $(this);
+                            const agencyId = button.data('agency-id');
+                            const agencyName = button.data('agency-name');
+                            
+                            if (confirm(`Êtes-vous sûr de vouloir supprimer l'agence "${agencyName}" ?`)) {
+                                const form = $('<form>', {
+                                    method: 'POST',
+                                    action: `/agencies/${agencyId}`,
+                                    style: 'display: none;'
+                                }).append(
+                                    $('<input>', {type: 'hidden', name: '_token', value: $('meta[name="csrf-token"]').attr('content')}),
+                                    $('<input>', {type: 'hidden', name: '_method', value: 'DELETE'})
+                                );
+                                
+                                $('body').append(form);
+                                form.submit();
+                            }
+                        });
+                        
+                        // Ajuster la largeur des colonnes
+                        setTimeout(adjustTableColumns, 100);
+                        
                         // Afficher la notification de succès
                         showNotification('Agence ajoutée avec succès !', 'success');
-                        
-                        // Fermer le modal
-                        closeModal();
-
-                        // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
-                        const table = document.getElementById('agenciesTable').getElementsByTagName('tbody')[0];
-                        const emptyRow = table ? table.querySelector('tr td[colspan]') : null;
-                        if (emptyRow) {
-                            emptyRow.parentElement.remove();
-                        }
-
-                        // Ajout dynamique dans le tableau sans reload (si le controller renvoie data.agency)
-                        if (data && data.agency && table) {
-                            const newRow = document.createElement('tr');
-                            newRow.setAttribute('data-agency-id', data.agency.id);
-                            newRow.innerHTML = `
-                                <td>${data.agency.id}</td>
-                                <td>
-                                    <span class='agency-name-text'>${data.agency.name_agency}</span>
-                                    <input type='text' class='form-control agency-name-input' value='${data.agency.name_agency}' style='display:none; width: 80%;' />
-                                </td>
-                                <td>
-                                    <span class='agency-line-text'></span>
-                                    <select class='form-control agency-line-select' style='display:none; width: 80%;'>
-                                        ${document.getElementById('line_id') ? document.getElementById('line_id').innerHTML : ''}
-                                    </select>
-                                </td>
-                                <td>
-                                    <span class='agency-pays-text'></span>
-                                </td>
-                                <td>
-                                    <span class='agency-adress-text'>${data.agency.adress_agency || ''}</span>
-                                    <input type='text' class='form-control agency-adress-input' value='${data.agency.adress_agency || ''}' style='display:none; width: 80%;' />
-                                </td>
-                                <td>
-                                    <div class='action-buttons d-flex justify-content-end gap-2'>
-                                        <a href='/agencies/${data.agency.id}' class='action-btn btn-view' style='text-decoration: none;' title='Voir'>
-                                            <i class='fas fa-eye'></i>
-                                        </a>
-                                        <button class='action-btn btn-update' title='Modifier' type='button'>
-                                            <i class='fas fa-edit'></i>
-                                        </button>
-                                        <button class='action-btn btn-validate' title='Valider' style='display:none;'>
-                                            <i class='fas fa-check'></i>
-                                        </button>
-                                        <form action='/agencies/${data.agency.id}' method='POST' style='display:inline;'>
-                                            <input type='hidden' name='_token' value='${form.querySelector('input[name="_token"]').value}'>
-                                            <input type='hidden' name='_method' value='DELETE'>
-                                            <button type='submit' class='action-btn btn-delete' title='Supprimer' onclick='return confirm("Voulez-vous vraiment supprimer cette agence ?")'>
-                                                <i class='fas fa-trash'></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            `;
-                            table.appendChild(newRow);
-                        }
                     })
                     .catch(error => {
                         // Afficher la notification d'erreur
@@ -705,9 +759,29 @@
         });
     });
 
+    // Fonction pour ajuster la largeur des colonnes
+    function adjustTableColumns() {
+        const table = $('#agenciesTable').DataTable();
+        table.columns.adjust().draw(false);
+        
+        // Forcer le recalcul des largeurs après un court délai
+        setTimeout(() => {
+            table.columns.adjust().draw(false);
+        }, 50);
+    }
+
     // Initialize DataTable
     $(document).ready(function() {
         const table = $('#agenciesTable').DataTable({
+            "responsive": true,
+            "autoWidth": false,
+            "columnDefs": [
+                { "width": "25%", "targets": 0 },  // Nom
+                { "width": "20%", "targets": 1 },  // Ligne
+                { "width": "20%", "targets": 2 },  // Pays
+                { "width": "25%", "targets": 3 },  // Adresse
+                { "width": "10%", "targets": 4, "orderable": false }   // Actions
+            ],
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/French.json"
             },
