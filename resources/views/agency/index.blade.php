@@ -277,7 +277,7 @@
 
                                     // Vérifier que les champs obligatoires sont remplis
                                     if (!name) {
-                                        showNotification('Le nom de l\'agence est obligatoire', 'danger');
+                                        showNotification('Le nom de l\'agence est obligatoire ', 'danger');
                                         return;
                                     }
 
