@@ -3,6 +3,30 @@
 @section('title', 'Navire - Gestion de Parc Automobile')
 
 @section('content')
+<style>
+    /* Style pour les notifications */
+    .alert-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        z-index: 1100;
+        opacity: 0.95;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+
+    /* Animation de clignotement */
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .alert-blink {
+        animation: blink 1s infinite;
+    }
+</style>
 <div class="dashboard">
     <!-- Sidebar -->
     @include('partials.sidebar')
@@ -183,6 +207,36 @@
         if (f) f.reset();
     }
 
+    // Fonction utilitaire pour afficher les notifications
+    function showNotification(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-notification alert-blink`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        // Ajouter la notification au corps du document
+        document.body.appendChild(alertDiv);
+
+        // Désactiver le clignotement après 3 secondes
+        setTimeout(() => {
+            alertDiv.classList.remove('alert-blink');
+        }, 3000);
+
+        // Supprimer la notification après 5 secondes
+        setTimeout(() => {
+            $(alertDiv).alert('close');
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 150);
+        }, 5000);
+    }
+
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -332,24 +386,29 @@
                                 emptyRow.remove();
                             }
                             
-                            // Afficher un message de succès
-                            const toast = document.createElement('div');
-                            toast.className = 'toast-message success';
-                            toast.textContent = data.message || 'Navire ajouté avec succès';
-                            document.body.appendChild(toast);
-                            setTimeout(() => toast.remove(), 3000);
+                            // Afficher la notification de succès
+                            showNotification('Le navire a été ajouté avec succès', 'success');
                             
                             // Fermer le modal
                             closeModal();
+                            
+                            // Recharger la page pour afficher le nouveau navire
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
                         }
 
 
                     })
                     .catch(error => {
-                        // Restaurer le bouton et ne pas afficher d'alert intrusive
+                        // Afficher la notification d'erreur
+                        showNotification('Une erreur est survenue lors de l\'ajout du navire', 'danger');
+                        
+                        // Restaurer le bouton
                         saveBtn.innerHTML = 'Enregistrer';
                         saveBtn.disabled = false;
-                        // Optionnel: log dans la console pour debug
+                        
+                        // Log dans la console pour debug
                         console.error(error);
                     });
             } else {
@@ -410,47 +469,13 @@
                     row.find('.btn-save, .btn-cancel').addClass('d-none');
                     row.find('.btn-update, .btn-delete').removeClass('d-none');
                     
-                    // Afficher une notification de succès
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'alert alert-success alert-dismissible fade show';
-                    successMsg.role = 'alert';
-                    successMsg.innerHTML = `
-                        <i class="fas fa-check-circle me-2"></i>
-                        <strong>Succès !</strong> Le navire a été mis à jour avec succès.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    
-                    const alertContainer = document.querySelector('.content-area');
-                    if (alertContainer) {
-                        alertContainer.insertBefore(successMsg, alertContainer.firstChild);
-                        
-                        // Supprimer l'alerte après 5 secondes
-                        setTimeout(() => {
-                            $(successMsg).alert('close');
-                        }, 5000);
-                    }
+                    // Afficher la notification de succès
+                    showNotification('Le navire a été mis à jour avec succès', 'success');
                 }
             },
             error: function(xhr) {
-                // Afficher une notification d'erreur
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'alert alert-danger alert-dismissible fade show';
-                errorMsg.role = 'alert';
-                errorMsg.innerHTML = `
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong>Erreur !</strong> Une erreur est survenue lors de la mise à jour du navire.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                
-                const alertContainer = document.querySelector('.content-area');
-                if (alertContainer) {
-                    alertContainer.insertBefore(errorMsg, alertContainer.firstChild);
-                    
-                    // Supprimer l'alerte après 5 secondes
-                    setTimeout(() => {
-                        $(errorMsg).alert('close');
-                    }, 5000);
-                }
+                // Afficher la notification d'erreur
+                showNotification('Une erreur est survenue lors de la mise à jour du navire', 'danger');
                 
                 console.error(xhr);
             },
@@ -462,129 +487,61 @@
     });
 
     // Gestion de la suppression
-    $(document).on('click', '.btn-delete', function() {
+    $(document).on('click', '.btn-delete', function(e) {
+        e.preventDefault();
         const row = $(this).closest('tr');
+        const shipId = row.data('id');
+        const deleteBtn = $(this);
         const shipName = row.find('.ship-name-text').text();
         
-        // Créer une modale de confirmation personnalisée
-        const confirmModal = `
-            <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-danger text-white">
-                            <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmer la suppression</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Êtes-vous sûr de vouloir supprimer le navire <strong>${shipName}</strong> ?</p>
-                            <p class="text-muted">Cette action est irréversible.</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                                <i class="fas fa-trash-alt me-1"></i> Supprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Ajouter la modale au DOM
-        $('body').append(confirmModal);
-        
-        // Afficher la modale
-        const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        modal.show();
-        
-        // Gérer la confirmation de suppression
-        $('#confirmDeleteBtn').on('click', function() {
-            const deleteBtn = $(this);
-            const originalHtml = deleteBtn.html();
-            deleteBtn.html('<i class="fas fa-spinner fa-spin me-1"></i> Suppression...');
-            deleteBtn.prop('disabled', true);
-            
-            const shipId = row.data('id');
-            
-            // Envoyer la requête de suppression
-            $.ajax({
-                url: `/ships/${shipId}`,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Supprimer la ligne du tableau
-                        row.fadeOut(400, function() {
-                            row.remove();
-                            // Si le tableau est vide, afficher un message
-                            if ($('#naviresTable tbody tr').length === 0) {
-                                $('#naviresTable tbody').html('<tr><td colspan="3" class="text-center">Aucun navire trouvé.</td></tr>');
-                            }
-                        });
-                        
-                        // Afficher une notification de succès
-                        const successMsg = document.createElement('div');
-                        successMsg.className = 'alert alert-success alert-dismissible fade show';
-                        successMsg.role = 'alert';
-                        successMsg.innerHTML = `
-                            <i class="fas fa-check-circle me-2"></i>
-                            <strong>Succès !</strong> Le navire a été supprimé avec succès.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        `;
-                        
-                        const alertContainer = document.querySelector('.content-area');
-                        if (alertContainer) {
-                            alertContainer.insertBefore(successMsg, alertContainer.firstChild);
-                            
-                            // Supprimer l'alerte après 5 secondes
-                            setTimeout(() => {
-                                $(successMsg).alert('close');
-                            }, 5000);
+        // Désactiver le bouton pour éviter les clics multiples
+        deleteBtn.prop('disabled', true);
+        const originalHtml = deleteBtn.html();
+        deleteBtn.html('<i class="fas fa-spinner fa-spin"></i>');
+
+        // Afficher une confirmation avant de supprimer
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer le navire "${shipName}" ?`)) {
+            deleteBtn.html(originalHtml);
+            deleteBtn.prop('disabled', false);
+            return;
+        }
+
+        // Réactiver le bouton après la confirmation
+        deleteBtn.html(originalHtml);
+        deleteBtn.prop('disabled', false);
+
+        // Envoyer la requête de suppression
+        $.ajax({
+            url: `/ships/${shipId}`,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Supprimer la ligne du tableau
+                    row.fadeOut(400, function() {
+                        row.remove();
+                        // Si le tableau est vide, afficher un message
+                        if ($('#naviresTable tbody tr').length === 0) {
+                            $('#naviresTable tbody').html('<tr><td colspan="3" class="text-center">Aucun navire trouvé.</td></tr>');
                         }
-                    }
-                },
-                error: function(xhr) {
-                    // Afficher une notification d'erreur
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'alert alert-danger alert-dismissible fade show';
-                    errorMsg.role = 'alert';
-                    errorMsg.innerHTML = `
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Erreur !</strong> Une erreur est survenue lors de la suppression du navire.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
+                    });
                     
-                    const alertContainer = document.querySelector('.content-area');
-                    if (alertContainer) {
-                        alertContainer.insertBefore(errorMsg, alertContainer.firstChild);
-                        
-                        // Supprimer l'alerte après 5 secondes
-                        setTimeout(() => {
-                            $(errorMsg).alert('close');
-                        }, 5000);
-                    }
-                    
-                    console.error(xhr);
-                },
-                complete: function() {
-                    // Fermer la modale
-                    modal.hide();
-                    $('.modal-backdrop').remove();
-                    $('#confirmDeleteModal').remove();
-                    
-                    // Réactiver le bouton de suppression
-                    row.find('.btn-delete').html('<i class="fas fa-trash"></i>');
-                    row.find('.btn-delete').prop('disabled', false);
+                    // Afficher la notification de succès
+                    showNotification('Le navire a été supprimé avec succès', 'success');
                 }
-            });
-        });
-        
-        // Nettoyer la modale lorsqu'elle est fermée
-        $('#confirmDeleteModal').on('hidden.bs.modal', function () {
-            $(this).remove();
-            $('.modal-backdrop').remove();
+            },
+            error: function(xhr) {
+                // Afficher la notification d'erreur
+                showNotification('Une erreur est survenue lors de la suppression du navire', 'danger');
+                console.error(xhr);
+            },
+            complete: function() {
+                // Réactiver le bouton
+                deleteBtn.html(originalHtml);
+                deleteBtn.prop('disabled', false);
+            }
         });
     });
 
