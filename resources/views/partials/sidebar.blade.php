@@ -31,7 +31,7 @@
                   <i class="fas fa-ship"></i>
                   Navire
               </a>
-              <a href="{{ route('manifests') }}" class="nav-item">
+              <a href="{{ route('travels.index') }}" class="nav-item">
                   <i class="fas fa-file-contract"></i>
                   Manifeste
               </a>

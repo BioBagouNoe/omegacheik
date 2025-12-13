@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Travel;
 use Illuminate\Http\Request;
-
+use App\Models\Agency;
+use App\Models\Ship;
 class TravelController extends Controller
 {
     /**
@@ -12,8 +13,12 @@ class TravelController extends Controller
      */
     public function index()
     {
-        $travels = \App\Models\Travel::with('travelDetails')->get();
-        return response()->json($travels);
+        
+        $travels = Travel::all();
+        $ships = Ship::all();
+        $agencies = Agency::all();
+        return view('manifest.index', compact('travels', 'ships', 'agencies'));
+
     }
 
     /**
@@ -21,9 +26,7 @@ class TravelController extends Controller
      */
     public function create()
     {
-        // Si vous avez une vue pour créer un travel, retournez-la ici
-        // return view('travel.create');
-        return response()->json(['message' => 'Show create travel form']);
+        //
     }
 
     /**
@@ -37,8 +40,10 @@ class TravelController extends Controller
             'docking_date' => 'required|date',
             'end_unloading' => 'required|date',
             'status' => 'required|in:scheduled,in_progress,completed,canceled',
+            'agency_id' => 'required|exists:agencies,id',
+            'ship_id' => 'required|exists:ships,id',
         ]);
-        $travel = \App\Models\Travel::registerTravel($validated);
+        $travel = Travel::registerTravel($validated);
         return response()->json($travel, 201);
     }
 
@@ -72,6 +77,8 @@ class TravelController extends Controller
             'docking_date' => 'sometimes|required|date',
             'end_unloading' => 'sometimes|required|date',
             'status' => 'sometimes|required|in:scheduled,in_progress,completed,canceled',
+            'agency_id' => 'sometimes|required|exists:agencies,id',
+            'ship_id' => 'sometimes|required|exists:ships,id',
         ]);
         $travel->updateTravel($validated);
         return response()->json($travel);

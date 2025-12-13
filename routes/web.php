@@ -52,7 +52,6 @@ Route::middleware('auth')->group(function () {
 
     // Manifestes
     Route::resource('travels', TravelController::class);
-    Route::view('/manifests', 'manifest.index')->name('manifests');
     Route::view('/manifest-details', 'manifest_detail.index')->name('manifest-details');
 
     // Navires

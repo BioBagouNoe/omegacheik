@@ -13,12 +13,24 @@ class Travel extends Model
         'docking_date',
         'end_unloading',
         'status',
+        'agency_id',
+        'ship_id',
     ];
 
     // Relations
     public function travelDetails()
     {
-        return $this->hasMany(Travel_detail::class, 'travel_id');
+       // return $this->hasMany(Travel_detail::class, 'travel_id');
+    }
+
+    public function agency()
+    {
+        return $this->belongsTo(\App\Models\Agency::class, 'agency_id');
+    }
+
+    public function ship()
+    {
+        return $this->belongsTo(\App\Models\Ship::class, 'ship_id');
     }
 
     // Méthodes métier

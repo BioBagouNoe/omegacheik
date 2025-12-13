@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Agency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,11 +18,11 @@ return new class extends Migration
             $table->date('arrival_date');
             $table->date('docking_date');
             $table->date('end_unloading');
+            $table->foreignId('agency_id')->nullable()->constrained('agencies')->onDelete('cascade');
+            $table->foreignId('ship_id')->nullable()->constrained('ships')->onDelete('cascade');
             $table->enum('status', ['scheduled', 'in_progress', 'completed', 'canceled']);
             $table->timestamps();
         });
-
-   
 
     }
 
