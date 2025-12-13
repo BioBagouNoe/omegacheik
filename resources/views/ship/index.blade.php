@@ -209,6 +209,9 @@
 
     // Fonction utilitaire pour afficher les notifications
     function showNotification(message, type = 'success') {
+        // Supprimer les notifications existantes
+        document.querySelectorAll('.alert-notification').forEach(el => el.remove());
+        
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-notification alert-blink`;
         alertDiv.role = 'alert';
@@ -221,6 +224,9 @@
         // Ajouter la notification au corps du document
         document.body.appendChild(alertDiv);
 
+        // Forcer le reflow pour que l'animation fonctionne
+        alertDiv.offsetHeight;
+
         // Désactiver le clignotement après 3 secondes
         setTimeout(() => {
             alertDiv.classList.remove('alert-blink');
@@ -228,7 +234,7 @@
 
         // Supprimer la notification après 5 secondes
         setTimeout(() => {
-            $(alertDiv).alert('close');
+            alertDiv.classList.add('fade');
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.parentNode.removeChild(alertDiv);
@@ -305,26 +311,6 @@
                         return data;
                     })
                     .then(data => {
-                        // Notification visuelle
-                        const msg = document.createElement('div');
-                        msg.textContent = 'Agence ajoutée avec succès !';
-                        msg.style.display = 'block';
-                        msg.style.position = 'fixed';
-                        msg.style.top = '20px';
-                        msg.style.left = '50%';
-                        msg.style.transform = 'translateX(-50%)';
-                        msg.style.background = '#22c55e';
-                        msg.style.color = '#fff';
-                        msg.style.padding = '10px 30px';
-                        msg.style.borderRadius = '6px';
-                        msg.style.zIndex = '9999';
-                        msg.style.fontWeight = 'bold';
-                        msg.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                        document.body.appendChild(msg);
-                        setTimeout(() => {
-                            msg.remove();
-                        }, 3000);
-
                         closeModal();
 
                         // Supprime la ligne "Aucune agency pour le moment." s'il y en a une
@@ -376,16 +362,6 @@
                                 `
                             ];
 
-                            // Ajouter la nouvelle ligne à DataTables
-                            const rowNode = table.row.add(newRow).draw(false).node();
-                            $(rowNode).attr('data-id', data.navire.id);
-                            
-                            // Supprimer le message 'Aucun navire trouvé' s'il existe
-                            const emptyRow = table.rows().nodes().to$().filter('td.dataTables_empty').parent();
-                            if (emptyRow.length) {
-                                emptyRow.remove();
-                            }
-                            
                             // Afficher la notification de succès
                             showNotification('Le navire a été ajouté avec succès', 'success');
                             
@@ -494,31 +470,26 @@
         const deleteBtn = $(this);
         const shipName = row.find('.ship-name-text').text();
         
+        // Afficher une confirmation avant de supprimer
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer le navire "${shipName}" ?`)) {
+            return;
+        }
+
         // Désactiver le bouton pour éviter les clics multiples
         deleteBtn.prop('disabled', true);
         const originalHtml = deleteBtn.html();
         deleteBtn.html('<i class="fas fa-spinner fa-spin"></i>');
-
-        // Afficher une confirmation avant de supprimer
-        if (!confirm(`Êtes-vous sûr de vouloir supprimer le navire "${shipName}" ?`)) {
-            deleteBtn.html(originalHtml);
-            deleteBtn.prop('disabled', false);
-            return;
-        }
-
-        // Réactiver le bouton après la confirmation
-        deleteBtn.html(originalHtml);
-        deleteBtn.prop('disabled', false);
 
         // Envoyer la requête de suppression
         $.ajax({
             url: `/ships/${shipId}`,
             type: 'DELETE',
             data: {
-                _token: '{{ csrf_token() }}'
+                _token: '{{ csrf_token() }}',
+                _method: 'DELETE'
             },
             success: function(response) {
-                if (response.success) {
+                if (response && response.success) {
                     // Supprimer la ligne du tableau
                     row.fadeOut(400, function() {
                         row.remove();
@@ -530,12 +501,14 @@
                     
                     // Afficher la notification de succès
                     showNotification('Le navire a été supprimé avec succès', 'success');
+                } else {
+                    throw new Error('Réponse invalide du serveur');
                 }
             },
             error: function(xhr) {
                 // Afficher la notification d'erreur
                 showNotification('Une erreur est survenue lors de la suppression du navire', 'danger');
-                console.error(xhr);
+                console.error('Erreur lors de la suppression :', xhr);
             },
             complete: function() {
                 // Réactiver le bouton
@@ -584,20 +557,6 @@
             const row = $(this).closest('tr');
             const rowData = table.row(row).data();
             alert(`Affichage des détails pour ${rowData[0]} (${rowData[1]})`);
-        });
-
-        $('#naviresTable').on('click', '.btn-delete', function() {
-            const btn = this;
-            const row = $(this).closest('tr');
-            const rowData = table.row(row).data();
-            if (confirm(`Voulez-vous vraiment supprimer ${rowData[0]} (${rowData[1]}) ?`)) {
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    table.row(row).remove().draw();
-                    alert(`Suppression effectuée pour ${rowData[0]} (${rowData[1]})`);
-                }, 1500);
-            }
         });
     });
 </script>
