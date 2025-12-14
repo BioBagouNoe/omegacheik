@@ -20,7 +20,7 @@ class Travel extends Model
     // Relations
     public function travelDetails()
     {
-       // return $this->hasMany(Travel_detail::class, 'travel_id');
+        return $this->hasMany(\App\Models\TravelDetail::class, 'travel_id');
     }
 
     public function agency()

@@ -52,7 +52,16 @@ Route::middleware('auth')->group(function () {
 
     // Manifestes
     Route::resource('travels', TravelController::class);
-    Route::view('/manifest-details', 'manifest_detail.index')->name('manifest-details');
+    // Travel Details imbriqué sous travels
+    Route::get('travels/{travel}/details', [\App\Http\Controllers\TravelDetailController::class, 'index'])->name('travels.details.index');
+    Route::post('travels/{travel}/details', [\App\Http\Controllers\TravelDetailController::class, 'store'])->name('travels.details.store');
+    Route::put('travels/{travel}/details/{travel_detail}', [\App\Http\Controllers\TravelDetailController::class, 'update'])->name('travels.details.update');
+    Route::delete('travels/{travel}/details/{travel_detail}', [\App\Http\Controllers\TravelDetailController::class, 'destroy'])->name('travels.details.destroy');
+    // Pour la vue stylée
+    Route::get('/manifest-details/{travel}', function($travel) {
+        $travel = \App\Models\Travel::with('travelDetails')->findOrFail($travel);
+        return view('manifest_detail.index', compact('travel'));
+    })->name('manifest-details');
 
     // Navires
 Route::resource('ships', ShipController::class);

@@ -67,8 +67,8 @@ class TravelController extends Controller
      */
     public function show(Travel $travel)
     {
-        $travel->load('travelDetails');
-        return response()->json($travel);
+        $travel->load(['travelDetails', 'ship', 'agency']);
+        return view('manifest_detail.index', compact('travel'));
     }
 
     /**

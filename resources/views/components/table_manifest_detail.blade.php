@@ -36,12 +36,13 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>VH-001</td>
-                <td>AB-123-CD</td>
-                <td>Toyota</td>
-                <td>-----</td>
-                <td>2024</td>
+        @foreach($travel->travelDetails as $detail)
+            <tr data-id="{{ $detail->id }}">
+                <td>{{ $detail->bl }}</td>
+                <td>{{ $detail->chassis }}</td>
+                <td>{{ $detail->mark }}</td>
+                <td>{{ $detail->type }}</td>
+                <td>{{ $detail->year_make }}</td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn btn-view" title="Voir">
@@ -59,75 +60,7 @@
                     </div>
                 </td>
             </tr>
-            <tr>
-                <td>VH-002</td>
-                <td>EF-456-GH</td>
-                <td>Renault</td>
-                <td>-----</td>
-                <td>2021</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn btn-view" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>VH-003</td>
-                <td>IJ-789-KL</td>
-                <td>Peugeot</td>
-                <td>-----</td>
-                <td>2023</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn btn-view" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>VH-004</td>
-                <td>MN-012-OP</td>
-                <td>Citroën</td>
-                <td>-----</td>
-                <td>2020</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn btn-view" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn btn-update" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn btn-reset" title="Réinitialiser">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                        <button class="action-btn btn-delete" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
+        @endforeach
         </tbody>
     </table>
 </div>

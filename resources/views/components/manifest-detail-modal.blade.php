@@ -60,14 +60,8 @@
                         </div>
                     </div>
 
-                    <!-- Manifest associé -->
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="id_manifest">Manifeste</label>
-                        <select class="form-control" id="id_manifest" required>
-                            <option value="">Sélectionner un manifeste</option>
-                            <!-- Options dynamiques depuis la table manifest -->
-                        </select>
-                    </div>
+                    <!-- Manifest associé (hidden) -->
+                    <input type="hidden" id="travel_id" value="{{ $travel->id }}">
                 </form>
 
 
