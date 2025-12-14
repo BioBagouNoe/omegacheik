@@ -149,9 +149,9 @@
 
                         @forelse($travels as $travel)
                         <tr data-travel-id="{{ $travel->id }}" data-ship-id="{{ $travel->ship_id }}">
-                            <!-- Navire -->
-                            <td class="ship-name-cell" data-ship-id="{{ $travel->ship_id }}">
-                                {{ $travel->ship->name_nav ?? '' }}
+                            <!-- Numéro du voyage -->
+                            <td class="num-travel-cell" data-ship-id="{{ $travel->ship_id }}">
+                                {{ $travel->num_travel ?? '' }}
                             </td>
 
                             <!-- Date d'arrivée -->
@@ -460,6 +460,11 @@
                     addAgencyModal.classList.remove('active');
                     const f = document.getElementById('agencyForm');
                     if (f) f.reset();
+                    // Réactiver le bouton d'enregistrement et restaurer son texte
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = 'Enregistrer';
+                    }
                 }
 
                 if (closeModalBtn) {
@@ -544,7 +549,7 @@
                                     shipName = foundShip ? foundShip.name : '';
                                 }
                                 const newRow = [
-                                    shipName,
+                                    travel.num_travel || '',
                                     travel.arrival_date || '',
                                     travel.docking_date || '',
                                     travel.end_unloading || '',
@@ -567,7 +572,10 @@
                                     </div>
                                     `
                                 ];
-                                table.row.add(newRow).draw(false);
+                                // Ajout de la ligne avec l'attribut data-travel-id pour permettre l'édition/suppression immédiate
+                                const addedRow = table.row.add(newRow).draw(false).node();
+                                $(addedRow).attr('data-travel-id', travel.id);
+                                $(addedRow).attr('data-ship-id', travel.ship_id);
                                 setTimeout(adjustTableColumns, 100);
                                 showNotification('Voyage ajouté avec succès !', 'success');
                             })
@@ -698,14 +706,15 @@
                         const status = tds.eq(4).text().trim();
 
                         // Création du select navire
-                        let shipSelect = `<select class='form-control form-control-sm' name='ship_id' required>`;
-                        shipSelect += `<option value=''>Sélectionner un navire</option>`;
-                        shipsList.forEach(function(ship) {
-                            shipSelect += `<option value='${ship.id}' ${(shipId == ship.id) ? 'selected' : ''}>${ship.name}</option>`;
-                        });
-                        shipSelect += `</select>`;
-
-                        tds.eq(0).html(shipSelect);
+                        // Input pour le numéro du voyage
+                        // Récupérer la valeur actuelle du numéro de voyage, même si la classe n'est pas présente (cas ligne ajoutée dynamiquement)
+                        let numTravelValue = '';
+                        if (row.find('.num-travel-cell').length) {
+                            numTravelValue = row.find('.num-travel-cell').text().trim();
+                        } else {
+                            numTravelValue = tds.eq(0).text().trim();
+                        }
+                        tds.eq(0).html(`<input type='text' class='form-control form-control-sm' name='num_travel' value='${numTravelValue}' required>`);
                         tds.eq(1).html(`<input type='date' class='form-control form-control-sm' value="${arrival}" name='arrival_date' required>`);
                         tds.eq(2).html(`<input type='date' class='form-control form-control-sm' value="${docking}" name='docking_date' required>`);
                         tds.eq(3).html(`<input type='date' class='form-control form-control-sm' value="${endUnload}" name='end_unloading' required>`);
@@ -736,8 +745,7 @@
                         const row = $(this).closest('tr');
                         const tds = row.find('td');
                         const id = row.data('travel-id'); // Correction ici !
-                        const shipId = tds.eq(0).find('select').val();
-                        const shipName = shipsList.find(s => s.id == shipId)?.name || '';
+                        const numTravel = tds.eq(0).find('input').val();
                         const arrival = tds.eq(1).find('input').val();
                         const docking = tds.eq(2).find('input').val();
                         const endUnload = tds.eq(3).find('input').val();
@@ -750,7 +758,7 @@
                             data: {
                                 _token: token,
                                 _method: 'PUT',
-                                ship_id: shipId,
+                                num_travel: numTravel,
                                 arrival_date: arrival,
                                 docking_date: docking,
                                 end_unloading: endUnload,
@@ -758,7 +766,7 @@
                             },
                             success: function(response) {
                                 // Met à jour la ligne avec les nouvelles valeurs
-                                tds.eq(0).html(shipName).attr('data-ship-id', shipId);
+                                tds.eq(0).html(numTravel);
                                 tds.eq(1).html(arrival);
                                 tds.eq(2).html(docking);
                                 tds.eq(3).html(endUnload);

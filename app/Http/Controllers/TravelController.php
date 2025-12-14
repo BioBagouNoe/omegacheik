@@ -44,7 +44,22 @@ class TravelController extends Controller
             'ship_id' => 'required|exists:ships,id',
         ]);
         $travel = Travel::registerTravel($validated);
-        return response()->json($travel, 201);
+        // Charger les relations nécessaires pour la réponse JS
+        $travel->load(['ship', 'agency']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Voyage ajouté avec succès !',
+            'id' => $travel->id,
+            'num_travel' => $travel->num_travel,
+            'arrival_date' => $travel->arrival_date,
+            'docking_date' => $travel->docking_date,
+            'end_unloading' => $travel->end_unloading,
+            'status' => $travel->status,
+            'agency_id' => $travel->agency_id,
+            'ship_id' => $travel->ship_id,
+            'ship' => $travel->ship,
+            'agency' => $travel->agency,
+        ], 201);
     }
 
     /**
