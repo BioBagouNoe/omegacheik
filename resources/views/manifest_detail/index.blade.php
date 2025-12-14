@@ -22,30 +22,55 @@
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-ship fa-2x text-primary me-3"></i>
                         <h4 class="mb-0">Informations du manifeste</h4>
-                        <span class="badge bg-info text-dark ms-3"><i class="fas fa-hashtag me-1"></i> {{ $travel->num_travel }}</span>
+                        <span class="badge bg-info text-dark ms-3"><i class="fas fa-hashtag me-1"></i> <span id="num_travel_display">{{ $travel->num_travel }}</span></span>
+                        <button id="editManifestBtn" class="btn btn-outline-primary btn-sm ms-auto" style="border-radius: 2rem; font-weight: 600;">
+                            <i class="fas fa-pen"></i> Modifier
+                        </button>
+                        <button id="saveManifestBtn" class="btn btn-success btn-sm ms-2 d-none" style="border-radius: 2rem; font-weight: 600;">
+                            <i class="fas fa-check"></i> Sauvegarder
+                        </button>
+                        <button id="cancelManifestBtn" class="btn btn-secondary btn-sm ms-2 d-none" style="border-radius: 2rem; font-weight: 600;">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
                     </div>
                     <div class="row g-3 mb-2">
                         <div class="col-md-4">
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-flag fa-fw text-secondary me-2"></i>
                                 <strong>Statut :</strong>
-                                <span class="ms-2 badge {{ $travel->status == 'completed' ? 'bg-success' : ($travel->status == 'in_progress' ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                                <span id="status_display" class="ms-2 badge {{ $travel->status == 'completed' ? 'bg-success' : ($travel->status == 'in_progress' ? 'bg-warning text-dark' : 'bg-secondary') }}">
                                     <i class="fas fa-circle me-1"></i> {{ ucfirst(str_replace('_', ' ', $travel->status)) }}
                                 </span>
+                                <select id="status_input" class="form-select form-select-sm d-none ms-2" style="width:auto;">
+                                    <option value="scheduled" {{ $travel->status == 'scheduled' ? 'selected' : '' }}>Prévu</option>
+                                    <option value="in_progress" {{ $travel->status == 'in_progress' ? 'selected' : '' }}>En cours</option>
+                                    <option value="completed" {{ $travel->status == 'completed' ? 'selected' : '' }}>Terminé</option>
+                                    <option value="canceled" {{ $travel->status == 'canceled' ? 'selected' : '' }}>Annulé</option>
+                                </select>
                             </span>
                         </div>
                         <div class="col-md-4">
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-ship fa-fw text-primary me-2"></i>
                                 <strong>Navire :</strong>
-                                <span class="ms-2">{{ $travel->ship && $travel->ship->name_nav ? $travel->ship->name_nav : 'Non renseigné' }}</span>
+                                <span id="ship_display" class="ms-2">{{ $travel->ship && $travel->ship->name_nav ? $travel->ship->name_nav : 'Non renseigné' }}</span>
+                                <select id="ship_input" class="form-select form-select-sm d-none ms-2" style="width:auto;display:inline-block;max-width:180px;">
+                                    @foreach(App\Models\Ship::all() as $ship)
+                                        <option value="{{ $ship->id }}" {{ $travel->ship_id == $ship->id ? 'selected' : '' }}>{{ $ship->name_nav }}</option>
+                                    @endforeach
+                                </select>
                             </span>
                         </div>
                         <div class="col-md-4">
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-building fa-fw text-info me-2"></i>
                                 <strong>Agence :</strong>
-                                <span class="ms-2">{{ $travel->agency && $travel->agency->name_agency ? $travel->agency->name_agency : 'Non renseignée' }}</span>
+                                <span id="agency_display" class="ms-2">{{ $travel->agency && $travel->agency->name_agency ? $travel->agency->name_agency : 'Non renseignée' }}</span>
+                                <select id="agency_input" class="form-select form-select-sm d-none ms-2" style="width:auto;display:inline-block;max-width:180px;">
+                                    @foreach(App\Models\Agency::all() as $agency)
+                                        <option value="{{ $agency->id }}" {{ $travel->agency_id == $agency->id ? 'selected' : '' }}>{{ $agency->name_agency }}</option>
+                                    @endforeach
+                                </select>
                             </span>
                         </div>
                     </div>
@@ -54,21 +79,24 @@
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-calendar-alt fa-fw text-success me-2"></i>
                                 <strong>Date d'arrivée :</strong>
-                                <span class="ms-2">{{ $travel->arrival_date }}</span>
+                                <span id="arrival_display" class="ms-2">{{ $travel->arrival_date }}</span>
+                                <input id="arrival_input" type="date" class="form-control form-control-sm d-none ms-2" style="width:auto;display:inline-block;max-width:150px;" value="{{ $travel->arrival_date }}" />
                             </span>
                         </div>
                         <div class="col-md-4">
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-anchor fa-fw text-primary me-2"></i>
                                 <strong>Date d'accostage :</strong>
-                                <span class="ms-2">{{ $travel->docking_date }}</span>
+                                <span id="docking_display" class="ms-2">{{ $travel->docking_date }}</span>
+                                <input id="docking_input" type="date" class="form-control form-control-sm d-none ms-2" style="width:auto;display:inline-block;max-width:150px;" value="{{ $travel->docking_date }}" />
                             </span>
                         </div>
                         <div class="col-md-4">
                             <span class="d-flex align-items-center">
                                 <i class="fas fa-box-open fa-fw text-warning me-2"></i>
                                 <strong>Fin de déchargement :</strong>
-                                <span class="ms-2">{{ $travel->end_unloading }}</span>
+                                <span id="end_unloading_display" class="ms-2">{{ $travel->end_unloading }}</span>
+                                <input id="end_unloading_input" type="date" class="form-control form-control-sm d-none ms-2" style="width:auto;display:inline-block;max-width:150px;" value="{{ $travel->end_unloading }}" />
                             </span>
                         </div>
                     </div>
@@ -82,6 +110,84 @@
     @include('components.manifest-detail-modal')
 
     <script>
+                // --- Manifest Edit Inline ---
+                const editManifestBtn = document.getElementById('editManifestBtn');
+                const saveManifestBtn = document.getElementById('saveManifestBtn');
+                const cancelManifestBtn = document.getElementById('cancelManifestBtn');
+                const fields = [
+                    {display: 'num_travel_display', input: null},
+                    {display: 'status_display', input: 'status_input'},
+                    {display: 'ship_display', input: 'ship_input'},
+                    {display: 'agency_display', input: 'agency_input'},
+                    {display: 'arrival_display', input: 'arrival_input'},
+                    {display: 'docking_display', input: 'docking_input'},
+                    {display: 'end_unloading_display', input: 'end_unloading_input'},
+                ];
+                let manifestEditBackup = {};
+                if(editManifestBtn) {
+                    editManifestBtn.addEventListener('click', function() {
+                        fields.forEach(f => {
+                            if(f.input) {
+                                document.getElementById(f.display).classList.add('d-none');
+                                document.getElementById(f.input).classList.remove('d-none');
+                            }
+                        });
+                        editManifestBtn.classList.add('d-none');
+                        saveManifestBtn.classList.remove('d-none');
+                        cancelManifestBtn.classList.remove('d-none');
+                        // Backup
+                        manifestEditBackup = {};
+                        fields.forEach(f => {
+                            if(f.input) manifestEditBackup[f.input] = document.getElementById(f.input).value;
+                        });
+                    });
+                    cancelManifestBtn.addEventListener('click', function() {
+                        fields.forEach(f => {
+                            if(f.input) {
+                                document.getElementById(f.display).classList.remove('d-none');
+                                document.getElementById(f.input).classList.add('d-none');
+                                document.getElementById(f.input).value = manifestEditBackup[f.input];
+                            }
+                        });
+                        editManifestBtn.classList.remove('d-none');
+                        saveManifestBtn.classList.add('d-none');
+                        cancelManifestBtn.classList.add('d-none');
+                    });
+                    saveManifestBtn.addEventListener('click', function() {
+                        const travelId = {{ $travel->id }};
+                        const data = {
+                            status: document.getElementById('status_input').value,
+                            ship_id: document.getElementById('ship_input').value,
+                            agency_id: document.getElementById('agency_input').value,
+                            arrival_date: document.getElementById('arrival_input').value,
+                            docking_date: document.getElementById('docking_input').value,
+                            end_unloading: document.getElementById('end_unloading_input').value,
+                        };
+                        saveManifestBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+                        saveManifestBtn.disabled = true;
+                        fetch(`/travels/${travelId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(r => r.json())
+                        .then(json => {
+                            if(json.status === 'success' || json.success) {
+                                location.reload();
+                            } else {
+                                throw new Error(json.message || 'Erreur lors de la sauvegarde');
+                            }
+                        })
+                        .catch(e => {
+                            saveManifestBtn.innerHTML = '<i class="fas fa-check"></i> Sauvegarder';
+                            saveManifestBtn.disabled = false;
+                            alert(e.message || 'Erreur lors de la sauvegarde');
+                        });
+                    });
+                }
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const sidebar = document.getElementById('sidebar');

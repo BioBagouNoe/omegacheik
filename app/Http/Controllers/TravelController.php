@@ -96,7 +96,11 @@ class TravelController extends Controller
             'ship_id' => 'sometimes|required|exists:ships,id',
         ]);
         $travel->updateTravel($validated);
-        return response()->json($travel);
+        return response()->json([
+            'success' => true,
+            'message' => 'Manifeste mis à jour avec succès',
+            'travel' => $travel
+        ]);
     }
 
     /**
