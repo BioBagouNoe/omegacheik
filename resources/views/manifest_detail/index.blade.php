@@ -103,6 +103,7 @@
                 </div>
                 <!-- DataTable -->
                 @include('components.table_manifest_detail')
+                @stack('scripts')
             </section>
         </main>
     </div>
