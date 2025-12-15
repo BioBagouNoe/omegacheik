@@ -7,6 +7,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            
             <div class="modal-body">
                 <form id="resetPasswordForm">
                     <!-- Form Group (current password)-->
