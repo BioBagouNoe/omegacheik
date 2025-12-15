@@ -270,7 +270,7 @@
             }
         });
 
-        // Initialize DataTable et gestion suppression réelle
+        // Initialize DataTable
         $(document).ready(function() {
             const table = $('#vehiclesTable').DataTable({
                 "language": {
@@ -288,36 +288,7 @@
                     }
                 ]
             });
-
-            // Suppression réelle
-            $('#vehiclesTable').on('click', '.btn-delete', function() {
-                const btn = this;
-                const row = $(this).closest('tr');
-                const bl = row.find('td').eq(0).text();
-                const id = row.data('id');
-                const travelId = document.getElementById('travel_id').value;
-                if (!confirm(`Voulez-vous vraiment supprimer ${bl} ?`)) return;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content') || document.querySelector('input[name="_token"]').value;
-                fetch(`/travels/${travelId}/details/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': token
-                    }
-                })
-                .then(response => response.json())
-                .then(json => {
-                    if (!json.success) throw new Error(json.message || 'Erreur lors de la suppression');
-                    table.row(row).remove().draw();
-                    alert(`Suppression effectuée pour ${bl}`);
-                })
-                .catch(error => {
-                    btn.innerHTML = '<i class="fas fa-trash"></i>';
-                    btn.disabled = false;
-                    alert(error.message || 'Erreur lors de la suppression');
-                });
-            });
+            // Note: Delete handler is in table_manifest_detail.blade.php to avoid duplication
         });
         
     </script>

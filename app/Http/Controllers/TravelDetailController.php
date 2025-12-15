@@ -68,10 +68,11 @@ class TravelDetailController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TravelDetail $travel_detail)
+    public function update(Request $request, $travel, $travel_detail)
     {
+        $detail = TravelDetail::findOrFail($travel_detail);
         $validated = $request->validate([
-            'bar_code' => 'required|string|unique:travel_details,bar_code,' . $travel_detail->id,
+            'bar_code' => 'nullable|string|unique:travel_details,bar_code,' . $detail->id,
             'bl' => 'required|string',
             'consignor' => 'required|string',
             'destination' => 'required|string',
@@ -82,20 +83,21 @@ class TravelDetailController extends Controller
             'year_make' => 'required|integer',
             'travel_id' => 'required|exists:travel,id',
         ]);
-        $travel_detail->update($validated);
+        $detail->update($validated);
         return response()->json([
             'success' => true,
             'message' => 'Détail modifié',
-            'detail' => $travel_detail
+            'detail' => $detail
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TravelDetail $travel_detail)
+    public function destroy($travel, $travel_detail)
     {
-        $travel_detail->delete();
+        $detail = TravelDetail::findOrFail($travel_detail);
+        $detail->delete();
         return response()->json([
             'success' => true,
             'message' => 'Détail supprimé'
